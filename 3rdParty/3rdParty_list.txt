@@ -1,0 +1,6 @@
+OCCT libarry:
+AllDLL
+inc
+src
+Common
+OCCTlib
