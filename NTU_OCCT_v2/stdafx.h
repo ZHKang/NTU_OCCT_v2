@@ -20,6 +20,7 @@
 #include <afxcmn.h>             // MFC support for Windows Common Controls
 #endif // _AFX_NO_AFXCMN_SUPPORT
 
+
 #pragma warning(  disable : 4244 )        // Issue warning 4244
 #include "Standard_ShortReal.hxx"
 #pragma warning(  default : 4244 )        // Issue warning 4244
@@ -42,8 +43,11 @@
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepPrimAPI_MakeSphere.hxx>
 #include <BRepPrimAPI_MakeWedge.hxx>
+#include <BRepPrimAPI_MakeCylinder.hxx>
+#include <BRepPrimAPI_MakeTorus.hxx>
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
+#include <BRepBuilderAPI_Transform.hxx>
 #include <BRepTools.hxx>
 #include <Bnd_Box2d.hxx>
 #include <BndLib.hxx>
@@ -70,6 +74,7 @@
 #include <GccEnt_QualifiedLin.hxx>
 #include <gce_MakeCirc2d.hxx>
 #include <gce_MakeLin2d.hxx>
+#include <gce_MakeRotation.hxx>
 #include <GCE2d_MakeSegment.hxx>
 #include <GCE2d_MakeParabola.hxx>
 #include <GCE2d_MakeEllipse.hxx>
@@ -157,6 +162,7 @@
 #include <gp_Pnt2d.hxx>
 #include <gp_Trsf.hxx>
 #include <gp_Vec2d.hxx>
+#include <gp_Quaternion.hxx>
 
 #include <IntAna_IntConicQuad.hxx>
 

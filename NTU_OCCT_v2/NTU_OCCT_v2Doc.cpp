@@ -147,17 +147,20 @@ void CNTU_OCCT_v2Doc::OnBox()
 		myBox = new AIS_Shape (B.Shape());
 
 		myAISContext->SetMaterial(myBox,Graphic3d_NOM_PEWTER);
-		myAISContext->SetDisplayMode(myBox,1);
-
 		myAISContext->Display(myBox);
 		TCollection_AsciiString Message("BRepPrimAPI_MakeBox Box1(gp_Pnt(0,-400,-100), 200.,150.,100.);\n");
 
 		PocessTextInDialog("Create Box",Message);
+		Fit();
 	}
 }
 
 void CNTU_OCCT_v2Doc::OnCylinder()
 {
+	BRepPrimAPI_MakeCylinder C(30.,100.);
+	Handle(AIS_Shape) ais1 = new AIS_Shape(C.Shape());
+	myAISContext->Display(ais1, Standard_False);
+	Fit();
 }
 
 void CNTU_OCCT_v2Doc::OnSphere()
@@ -179,20 +182,38 @@ void CNTU_OCCT_v2Doc::OnSphere()
 
 void CNTU_OCCT_v2Doc::OnRotate()
 {
-	Handle_AIS_Shape RotateS;
-	BRepPrimAPI_MakeWedge W(60.,100.,80.,20.);
-	RotateS = new AIS_Shape(W.Shape());
-	myAISContext->Display(RotateS);
+	BRepPrimAPI_MakeCylinder C(30.,100.);
+	Handle(AIS_Shape) ais1 = new AIS_Shape(C.Shape());
+	myAISContext->Display(ais1, Standard_False);
 
-	gp_Trsf theTransformation;
-	gp_Ax1 axe = gp_Ax1(gp_Pnt(200,60,60),gp_Dir(0.,1.,0.));
-	Handle(Geom_Axis1Placement) Gax1 = new Geom_Axis1Placement(axe);
-	Handle (AIS_Axis) ax1 = new AIS_Axis(Gax1);
-	myAISContext->SetColor(ax1,Quantity_NOC_BLACK);
-	myAISContext->Display(ax1,Standard_False);
-	////
+	gp_Dir axis (1,1,1);
+	gp_Pnt pos (50,150,0);
+	gp_Trsf trans;
+	trans.SetValues(1,0,axis.X(),pos.X(),
+		0,1,axis.Y(),pos.Y(),
+		0,0,axis.Z(),pos.Z());
+
+
+	BRepPrimAPI_MakeCylinder D(30.,100.);
+	TopoDS_Shape topoais2 = D.Shape();
+	BRepBuilderAPI_Transform myBRepTransform(topoais2,trans,true);
+
+	Handle(AIS_Shape) ais2 = new AIS_Shape(myBRepTransform.Shape());
+	myAISContext->SetColor(ais2,Quantity_NOC_BLUE4 );
+	myAISContext->Display(ais2, Standard_False);
+
+	Fit();
+	//gp_Trsf theTransformation;
+	//gp_Ax1 axe = gp_Ax1(gp_Pnt(200,60,60),gp_Dir(0.,1.,0.));
+	//Handle(Geom_Axis1Placement) Gax1 = new Geom_Axis1Placement(axe);
+	//Handle (AIS_Axis) ax1 = new AIS_Axis(Gax1);
+	//myAISContext->SetColor(ax1,Quantity_NOC_BLACK);
+	//myAISContext->Display(ax1,Standard_False);
+	//////
 	//theTransformation.SetRotation(axe,30*M_PI/180);
-	//BRepBuilderAPI_Transform myBRepTransformation(S,theTransformation);
+
+	//TopoDS_Shape topw = W.Shape();
+	//BRepBuilderAPI_Transform myBRepTransformation(topw,theTransformation);
 	//TopoDS_Shape S2 = myBRepTransformation.Shape();
 	//Handle(AIS_Shape) ais2 = new AIS_Shape(S2);
 	//myAISContext->SetColor(ais2,Quantity_NOC_BLUE1,Standard_False); 
@@ -200,14 +221,6 @@ void CNTU_OCCT_v2Doc::OnRotate()
 	//myAISContext->Display(ais2,Standard_False);
 	//Fit();
 
-	//TCollection_AsciiString Message ("\
-	//								 TopoDS_Shape S = BRepBuilderAPI_MakeWedge(60.,100.,80.,20.); \n\
-	//								 gp_Trsf theTransformation; \n\
-	//								 gp_Ax1 Axis = gp_Ax1(gp_Pnt(200,60,60),gp_Dir(0.,1.,0.)); \n\
-	//								 theTransformation.SetRotation(Axis,30*PI/180); // Rotation of 30 degrees \n\
-	//								 BRepBuilderAPI_Transform myBRepTransformation(S,theTransformation);\n\
-	//								 TopoDS_Shape TransformedShape = myBRepTransformation.Shape();	\n");
-	//PocessTextInDialog("Transform a Shape with Rotation.",Message);
 }
 void CNTU_OCCT_v2Doc::OnRobot()
 {
@@ -215,26 +228,26 @@ void CNTU_OCCT_v2Doc::OnRobot()
 }
 void CNTU_OCCT_v2Doc::OnTranslation()
 {
-	TopoDS_Shape S = BRepPrimAPI_MakeWedge(6.,10.,8.,2.).Shape(); 
-	Handle(AIS_Shape) ais1 = new AIS_Shape(S);
-	myAISContext->SetColor(ais1,Quantity_NOC_GREEN,Standard_False); 
-	myAISContext->SetMaterial(ais1,Graphic3d_NOM_PLASTIC,Standard_False);
-	myAISContext->Display(ais1,Standard_False);
-	gp_Trsf theTransformation;
-	gp_Vec theVectorOfTranslation(-6,-6,6);
+	//TopoDS_Shape S = BRepPrimAPI_MakeWedge(6.,10.,8.,2.).Shape(); 
+	//Handle(AIS_Shape) ais1 = new AIS_Shape(S);
+	//myAISContext->SetColor(ais1,Quantity_NOC_GREEN,Standard_False); 
+	//myAISContext->SetMaterial(ais1,Graphic3d_NOM_PLASTIC,Standard_False);
+	//myAISContext->Display(ais1,Standard_False);
+	//gp_Trsf theTransformation;
+	//gp_Vec theVectorOfTranslation(-6,-6,6);
 
-	Handle (ISession_Direction) aDirection1 = new ISession_Direction(gp_Pnt(0,0,0),theVectorOfTranslation);
-	myAISContext->Display(aDirection1,Standard_False);
+	//Handle (ISession_Direction) aDirection1 = new ISession_Direction(gp_Pnt(0,0,0),theVectorOfTranslation);
+	//myAISContext->Display(aDirection1,Standard_False);
 
-	theTransformation.SetTranslation(theVectorOfTranslation);
-	BRepBuilderAPI_Transform myBRepTransformation(S,theTransformation);
-	TopoDS_Shape S2 = myBRepTransformation.Shape();
+	//theTransformation.SetTranslation(theVectorOfTranslation);
+	//BRepBuilderAPI_Transform myBRepTransformation(S,theTransformation);
+	//TopoDS_Shape S2 = myBRepTransformation.Shape();
 
-	Handle(AIS_Shape) ais2 = new AIS_Shape(S2);
-	myAISContext->SetColor(ais2,Quantity_NOC_BLUE1,Standard_False); 
-	myAISContext->SetMaterial(ais2,Graphic3d_NOM_PLASTIC,Standard_False);   
-	myAISContext->Display(ais2,Standard_False);
+	//Handle(AIS_Shape) ais2 = new AIS_Shape(S2);
+	//myAISContext->SetColor(ais2,Quantity_NOC_BLUE1,Standard_False); 
+	//myAISContext->SetMaterial(ais2,Graphic3d_NOM_PLASTIC,Standard_False);   
+	//myAISContext->Display(ais2,Standard_False);
 
-	Fit();
+	//Fit();
 
 }
