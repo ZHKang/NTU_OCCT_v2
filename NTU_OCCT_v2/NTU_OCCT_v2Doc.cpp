@@ -3,31 +3,33 @@
 //
 
 #include "stdafx.h"
-// SHARED_HANDLERS can be defined in an ATL project implementing preview, thumbnail
-// and search filter handlers and allows sharing of document code with that project.
-#ifndef SHARED_HANDLERS
-#include "NTU_OCCT_v2.h"
-#endif
 
+#include "NTU_OCCT_v2.h"
 #include "NTU_OCCT_v2Doc.h"
 
 #include <propkey.h>
+
+#include <Geom_Axis1Placement.hxx>
+#include <AIS_Axis.hxx>
 
 
 // CNTU_OCCT_v2Doc
 
 IMPLEMENT_DYNCREATE(CNTU_OCCT_v2Doc, CDocument)
 
-BEGIN_MESSAGE_MAP(CNTU_OCCT_v2Doc, OCC_3dDoc)
+BEGIN_MESSAGE_MAP(CNTU_OCCT_v2Doc, OCC_3dBaseDoc)
 	ON_COMMAND(ID_BOX, OnBox)
 	ON_COMMAND(ID_Cylinder, OnCylinder)
 	ON_COMMAND(ID_SPHERE, OnSphere)
+	ON_COMMAND(ID_Rotation,OnRotate)
+	ON_COMMAND(ID_Robot,OnRobot)
+	ON_COMMAND(ID_TRANSLATION,OnTranslation)
 END_MESSAGE_MAP()
 
 
 // CNTU_OCCT_v2Doc construction/destruction
 
-CNTU_OCCT_v2Doc::CNTU_OCCT_v2Doc() : OCC_3dDoc()
+CNTU_OCCT_v2Doc::CNTU_OCCT_v2Doc()
 {
 	// TODO: add one-time construction code here
 	myCylinder.Nullify();
@@ -35,7 +37,8 @@ CNTU_OCCT_v2Doc::CNTU_OCCT_v2Doc() : OCC_3dDoc()
 	myBox.Nullify();
 
 	myAISContext->DefaultDrawer()->ShadingAspect()->SetColor(Quantity_NOC_CHARTREUSE1); 
-	myAISContext->DefaultDrawer()->ShadingAspect()->SetMaterial(Graphic3d_NOM_SILVER);
+	myAISContext->DefaultDrawer()->ShadingAspect()->SetMaterial(Graphic3d_NOM_BRONZE);
+	myAISContext->SetDisplayMode(AIS_Shaded,Standard_False);
 }
 
 CNTU_OCCT_v2Doc::~CNTU_OCCT_v2Doc()
@@ -101,38 +104,6 @@ void  CNTU_OCCT_v2Doc::Popup(const Standard_Integer  x,
 	pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON , winCoord.x, winCoord.y , 
 		AfxGetMainWnd());
 }
-void CNTU_OCCT_v2Doc::InitViewButtons()
-{
-	//POSITION pos = GetFirstViewPosition();
-	//while (pos != NULL)
-	//{
-	//	CNTU_OCCT_v2View* pView = (CNTU_OCCT_v2View*) GetNextView(pos);
-	//	pView->InitButtons();
-	//}
-}
-void CNTU_OCCT_v2Doc::DoSample()
-{
-	//InitViewButtons();
-
-	//HCURSOR hOldCursor = ::GetCursor();
-	//HCURSOR hNewCursor = AfxGetApp()->LoadStandardCursor(IDC_APPSTARTING);
-
-	//SetCursor(hNewCursor);
-	//{
-	//	try
-	//	{
-	//		myPresentation->DoSample();
-	//	}
-	//	catch (Standard_Failure)
-	//	{
-	//		Standard_SStream aSStream;
-	//		aSStream << "An exception was caught: " << Standard_Failure::Caught() << ends;
-	//		CString aMsg = aSStream.str().c_str();
-	//		AfxMessageBox (aMsg);
-	//	}
-	//}
-	//SetCursor(hOldCursor);
-}
 // CNTU_OCCT_v2Doc serialization
 
 void CNTU_OCCT_v2Doc::Serialize(CArchive& ar)
@@ -147,59 +118,6 @@ void CNTU_OCCT_v2Doc::Serialize(CArchive& ar)
 	}
 }
 
-#ifdef SHARED_HANDLERS
-
-// Support for thumbnails
-void CNTU_OCCT_v2Doc::OnDrawThumbnail(CDC& dc, LPRECT lprcBounds)
-{
-	// Modify this code to draw the document's data
-	dc.FillSolidRect(lprcBounds, RGB(255, 255, 255));
-
-	CString strText = _T("TODO: implement thumbnail drawing here");
-	LOGFONT lf;
-
-	CFont* pDefaultGUIFont = CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT));
-	pDefaultGUIFont->GetLogFont(&lf);
-	lf.lfHeight = 36;
-
-	CFont fontDraw;
-	fontDraw.CreateFontIndirect(&lf);
-
-	CFont* pOldFont = dc.SelectObject(&fontDraw);
-	dc.DrawText(strText, lprcBounds, DT_CENTER | DT_WORDBREAK);
-	dc.SelectObject(pOldFont);
-}
-
-// Support for Search Handlers
-void CNTU_OCCT_v2Doc::InitializeSearchContent()
-{
-	CString strSearchContent;
-	// Set search contents from document's data. 
-	// The content parts should be separated by ";"
-
-	// For example:  strSearchContent = _T("point;rectangle;circle;ole object;");
-	SetSearchContent(strSearchContent);
-}
-
-void CNTU_OCCT_v2Doc::SetSearchContent(const CString& value)
-{
-	if (value.IsEmpty())
-	{
-		RemoveChunk(PKEY_Search_Contents.fmtid, PKEY_Search_Contents.pid);
-	}
-	else
-	{
-		CMFCFilterChunkValueImpl *pChunk = NULL;
-		ATLTRY(pChunk = new CMFCFilterChunkValueImpl);
-		if (pChunk != NULL)
-		{
-			pChunk->SetTextValue(PKEY_Search_Contents, value, CHUNK_TEXT);
-			SetChunkValue(pChunk);
-		}
-	}
-}
-
-#endif // SHARED_HANDLERS
 
 // CNTU_OCCT_v2Doc diagnostics
 
@@ -219,20 +137,6 @@ void CNTU_OCCT_v2Doc::Dump(CDumpContext& dc) const
 // CNTU_OCCT_v2Doc commands
 /////////////////////////////////////////////////////////////////////////////
 
-void CNTU_OCCT_v2Doc::UpdateResultMessageDlg (CString theTitle, const TCollection_AsciiString& theMessage)
-{
-	CString aText (theMessage.ToCString());
-	myCResultDialog.SetText (aText);
-	myCResultDialog.SetTitle(theTitle);
-}
-
-void CNTU_OCCT_v2Doc::UpdateResultMessageDlg(CString theTitle, CString theMessage)
-{
-	myCResultDialog.SetText (theMessage);
-	myCResultDialog.SetTitle(theTitle);
-}
-
-
 void CNTU_OCCT_v2Doc::OnBox()
 {
 	if(myBox.IsNull())
@@ -246,11 +150,9 @@ void CNTU_OCCT_v2Doc::OnBox()
 		myAISContext->SetDisplayMode(myBox,1);
 
 		myAISContext->Display(myBox);
-		TCollection_AsciiString Message("\
-										BRepPrimAPI_MakeBox Box1(gp_Pnt(0,-400,-100), 200.,150.,100.);\n\
-										");
+		TCollection_AsciiString Message("BRepPrimAPI_MakeBox Box1(gp_Pnt(0,-400,-100), 200.,150.,100.);\n");
 
-		UpdateResultMessageDlg("Create Box",Message);
+		PocessTextInDialog("Create Box",Message);
 	}
 }
 
@@ -263,22 +165,76 @@ void CNTU_OCCT_v2Doc::OnSphere()
 	Handle_AIS_Shape mySphere;
 	if(mySphere.IsNull())
 	{
-		//BRepPrimAPI_MakeSphere S(gp_Pnt(0,300,0), 100.);
+		BRepPrimAPI_MakeSphere S(gp_Pnt(0,300,0), 100.);
 
-		//mySphere = new AIS_Shape(S.Shape());
+		mySphere = new AIS_Shape(S.Shape());
 
-		//myAISContext->SetMaterial(mySphere,Graphic3d_NOM_BRONZE);
-		//myAISContext->SetDisplayMode(mySphere,1);
-
-		//myAISContext->Display(mySphere);
-		//TCollection_AsciiString Message("\
-		//								BRepPrimAPI_MakeSphere S(gp_Pnt(0,300,0), 100.);\n\
-		//								");
-		//UpdateResultMessageDlg("Create Sphere",Message);
+		myAISContext->SetMaterial(mySphere,Graphic3d_NOM_BRONZE);
+		myAISContext->SetDisplayMode(mySphere,1);
+		myAISContext->Display(mySphere);
+		TCollection_AsciiString Message("BRepPrimAPI_MakeSphere S(gp_Pnt(0,300,0), 100.);\n");
+		PocessTextInDialog("Create Sphere",Message);
 	}
 }
 
-Handle_AIS_Shape CNTU_OCCT_v2Doc::GetBox()
+void CNTU_OCCT_v2Doc::OnRotate()
 {
-	return myBox;
+	Handle_AIS_Shape RotateS;
+	BRepPrimAPI_MakeWedge W(60.,100.,80.,20.);
+	RotateS = new AIS_Shape(W.Shape());
+	myAISContext->Display(RotateS);
+
+	gp_Trsf theTransformation;
+	gp_Ax1 axe = gp_Ax1(gp_Pnt(200,60,60),gp_Dir(0.,1.,0.));
+	Handle(Geom_Axis1Placement) Gax1 = new Geom_Axis1Placement(axe);
+	Handle (AIS_Axis) ax1 = new AIS_Axis(Gax1);
+	myAISContext->SetColor(ax1,Quantity_NOC_BLACK);
+	myAISContext->Display(ax1,Standard_False);
+	////
+	//theTransformation.SetRotation(axe,30*M_PI/180);
+	//BRepBuilderAPI_Transform myBRepTransformation(S,theTransformation);
+	//TopoDS_Shape S2 = myBRepTransformation.Shape();
+	//Handle(AIS_Shape) ais2 = new AIS_Shape(S2);
+	//myAISContext->SetColor(ais2,Quantity_NOC_BLUE1,Standard_False); 
+	//myAISContext->SetMaterial(ais2,Graphic3d_NOM_PLASTIC,Standard_False);   
+	//myAISContext->Display(ais2,Standard_False);
+	//Fit();
+
+	//TCollection_AsciiString Message ("\
+	//								 TopoDS_Shape S = BRepBuilderAPI_MakeWedge(60.,100.,80.,20.); \n\
+	//								 gp_Trsf theTransformation; \n\
+	//								 gp_Ax1 Axis = gp_Ax1(gp_Pnt(200,60,60),gp_Dir(0.,1.,0.)); \n\
+	//								 theTransformation.SetRotation(Axis,30*PI/180); // Rotation of 30 degrees \n\
+	//								 BRepBuilderAPI_Transform myBRepTransformation(S,theTransformation);\n\
+	//								 TopoDS_Shape TransformedShape = myBRepTransformation.Shape();	\n");
+	//PocessTextInDialog("Transform a Shape with Rotation.",Message);
+}
+void CNTU_OCCT_v2Doc::OnRobot()
+{
+
+}
+void CNTU_OCCT_v2Doc::OnTranslation()
+{
+	TopoDS_Shape S = BRepPrimAPI_MakeWedge(6.,10.,8.,2.).Shape(); 
+	Handle(AIS_Shape) ais1 = new AIS_Shape(S);
+	myAISContext->SetColor(ais1,Quantity_NOC_GREEN,Standard_False); 
+	myAISContext->SetMaterial(ais1,Graphic3d_NOM_PLASTIC,Standard_False);
+	myAISContext->Display(ais1,Standard_False);
+	gp_Trsf theTransformation;
+	gp_Vec theVectorOfTranslation(-6,-6,6);
+
+	Handle (ISession_Direction) aDirection1 = new ISession_Direction(gp_Pnt(0,0,0),theVectorOfTranslation);
+	myAISContext->Display(aDirection1,Standard_False);
+
+	theTransformation.SetTranslation(theVectorOfTranslation);
+	BRepBuilderAPI_Transform myBRepTransformation(S,theTransformation);
+	TopoDS_Shape S2 = myBRepTransformation.Shape();
+
+	Handle(AIS_Shape) ais2 = new AIS_Shape(S2);
+	myAISContext->SetColor(ais2,Quantity_NOC_BLUE1,Standard_False); 
+	myAISContext->SetMaterial(ais2,Graphic3d_NOM_PLASTIC,Standard_False);   
+	myAISContext->Display(ais2,Standard_False);
+
+	Fit();
+
 }
