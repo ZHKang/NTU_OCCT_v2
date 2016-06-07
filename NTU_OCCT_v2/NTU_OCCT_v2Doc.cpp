@@ -22,15 +22,22 @@ BEGIN_MESSAGE_MAP(CNTU_OCCT_v2Doc, OCC_3dBaseDoc)
 	ON_COMMAND(ID_BOX, OnBox)
 	ON_COMMAND(ID_Cylinder, OnCylinder)
 	ON_COMMAND(ID_SPHERE, OnSphere)
+	ON_COMMAND(ID_TORUS, OnTorus)
 	ON_COMMAND(ID_Rotation,OnRotate)
 	ON_COMMAND(ID_Robot,OnRobot)
 	ON_COMMAND(ID_TRANSLATION,OnTranslation)
-	//ON_COMMAND(ID_FILE_IMPORT_CSFDB, OnFileImportCSFDB)
-	//ON_COMMAND(ID_FILE_EXPORT_CSFDB, OnFileExportCSFDB)
+	ON_COMMAND(ID_FILE_IMPORT_CSFDB, OnFileImportCSFDB)
+	ON_COMMAND(ID_FILE_EXPORT_CSFDB, OnFileExportCSFDB)
 	ON_COMMAND(ID_FILE_IMPORT_IGES, OnFileImportIges)
-	//ON_COMMAND(ID_FILE_EXPORT_IGES, OnFileExportIges)
-	//ON_COMMAND(ID_FILE_IMPORT_STEP, OnFileImportStep)
-	//ON_COMMAND(ID_FILE_EXPORT_STEP, OnFileExportStep)
+	ON_COMMAND(ID_FILE_EXPORT_IGES, OnFileExportIges)
+	ON_COMMAND(ID_FILE_IMPORT_STEP, OnFileImportStep)
+	ON_COMMAND(ID_FILE_EXPORT_STEP, OnFileExportStep)
+	ON_COMMAND(ID_FILE_IMPORT_BREP, OnFileImportBrep)
+	ON_COMMAND(ID_FILE_EXPORT_BREP, OnFileExportBrep)
+	ON_COMMAND(ID_FILE_EXPORT_VRML, OnFileExportVrml)
+	ON_COMMAND(ID_FILE_IMPORT_STL, OnFileImportStl)
+	ON_COMMAND(ID_FILE_EXPORT_STL, OnFileExportStl)
+
 END_MESSAGE_MAP()
 
 
@@ -187,6 +194,15 @@ void CNTU_OCCT_v2Doc::OnSphere()
 		Fit();
 	}
 }
+void CNTU_OCCT_v2Doc::OnTorus()
+{
+	TopoDS_Shape S1 = BRepPrimAPI_MakeTorus(60., 20.).Shape();
+	Handle(AIS_Shape) ais1 = new AIS_Shape(S1);
+	myAISContext->SetColor(ais1,Quantity_NOC_AZURE,Standard_False); 
+	myAISContext->SetMaterial(ais1,Graphic3d_NOM_PLASTIC,Standard_False);    
+	myAISContext->Display(ais1,Standard_False);
+
+}
 
 void CNTU_OCCT_v2Doc::OnRotate()
 {
@@ -211,24 +227,6 @@ void CNTU_OCCT_v2Doc::OnRotate()
 	myAISContext->Display(ais2, Standard_False);
 
 	Fit();
-	//gp_Trsf theTransformation;
-	//gp_Ax1 axe = gp_Ax1(gp_Pnt(200,60,60),gp_Dir(0.,1.,0.));
-	//Handle(Geom_Axis1Placement) Gax1 = new Geom_Axis1Placement(axe);
-	//Handle (AIS_Axis) ax1 = new AIS_Axis(Gax1);
-	//myAISContext->SetColor(ax1,Quantity_NOC_BLACK);
-	//myAISContext->Display(ax1,Standard_False);
-	//////
-	//theTransformation.SetRotation(axe,30*M_PI/180);
-
-	//TopoDS_Shape topw = W.Shape();
-	//BRepBuilderAPI_Transform myBRepTransformation(topw,theTransformation);
-	//TopoDS_Shape S2 = myBRepTransformation.Shape();
-	//Handle(AIS_Shape) ais2 = new AIS_Shape(S2);
-	//myAISContext->SetColor(ais2,Quantity_NOC_BLUE1,Standard_False); 
-	//myAISContext->SetMaterial(ais2,Graphic3d_NOM_PLASTIC,Standard_False);   
-	//myAISContext->Display(ais2,Standard_False);
-	//Fit();
-
 }
 void CNTU_OCCT_v2Doc::OnRobot()
 {
@@ -259,6 +257,40 @@ void CNTU_OCCT_v2Doc::OnTranslation()
 	//Fit();
 
 }
+void CNTU_OCCT_v2Doc::OnFileImportBrep()
+{
+	TopoDS_ListOfShape   m_shapeList;
+	Handle(TopTools_HSequenceOfShape) BREPSequence = CImportExport::ReadBREP();
+	for(int i=1;i<= BREPSequence->Length();i++)
+	{
+		m_shapeList.Append(BREPSequence->Value(i));
+		for (TopoDS_ListIteratorOfListOfShape iter(m_shapeList); iter.More(); iter.Next())
+		{
+			Handle(AIS_Shape) ais = new AIS_Shape(iter.Value());
+			myAISContext->Display(ais, Standard_False);
+		}
+	}
+	Fit();
+}
+void CNTU_OCCT_v2Doc::OnFileExportBrep()
+{CImportExport::SaveBREP(myAISContext);}
+void CNTU_OCCT_v2Doc::OnFileImportCSFDB()
+{
+	TopoDS_ListOfShape   m_shapeList;
+	Handle(TopTools_HSequenceOfShape) CSFDBSequence = CImportExport::ReadCSFDB();
+	for(int i=1;i<= CSFDBSequence->Length();i++)
+	{
+		m_shapeList.Append(CSFDBSequence->Value(i));
+		for (TopoDS_ListIteratorOfListOfShape iter(m_shapeList); iter.More(); iter.Next())
+		{
+			Handle(AIS_Shape) ais = new AIS_Shape(iter.Value());
+			myAISContext->Display(ais, Standard_False);
+		}
+	}
+	Fit();
+}
+void CNTU_OCCT_v2Doc::OnFileExportCSFDB()
+{CImportExport::SaveBREP(myAISContext);}
 void CNTU_OCCT_v2Doc::OnFileImportIges()
 {
 	TopoDS_ListOfShape   m_shapeList;
@@ -272,13 +304,106 @@ void CNTU_OCCT_v2Doc::OnFileImportIges()
 			myAISContext->Display(ais, Standard_False);
 		}
 	}
-
-	//for ( TopoDS_ListIteratorOfListOfShape iter(m_shapeList); iter.More(); iter.Next() )
-	//{
-	//	Handle(AIS_Shape) ais = new AIS_Shape(iter.Value());
-	//	myAISContext->Display(ais, Standard_False);
-	//}
-
 	Fit();
+}
+void CNTU_OCCT_v2Doc::OnFileExportIges()
+{
+	CImportExport::SaveIGES(myAISContext);
+}
+void CNTU_OCCT_v2Doc::OnFileImportStep()
+{
+	TopoDS_ListOfShape   m_shapeList;
+	Handle(TopTools_HSequenceOfShape) STEPSequence = CImportExport::ReadSTEP();
+	for(int i=1;i<= STEPSequence->Length();i++)
+	{
+		m_shapeList.Append(STEPSequence->Value(i));
+		for (TopoDS_ListIteratorOfListOfShape iter(m_shapeList); iter.More(); iter.Next())
+		{
+			Handle(AIS_Shape) ais = new AIS_Shape(iter.Value());
+			myAISContext->Display(ais, Standard_False);
+		}
+	}
+	Fit();
+}
+void CNTU_OCCT_v2Doc::OnFileExportStep()
+{
+	CImportExport::SaveSTEP(myAISContext);
+}
+void CNTU_OCCT_v2Doc::OnFileExportVrml()
+{
+	CImportExport::SaveVRML(myAISContext);
+}
+void CNTU_OCCT_v2Doc::OnFileImportStl()
+{
+	CFileDialog dlg(TRUE,
+		NULL,
+		NULL,
+		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+		L"STL Files (*.STL, *.stl)|*.STL; *.stl|All Files (*.*)|*.*||",
+		NULL );
 
+	CString CASROOTValue;
+	CASROOTValue.GetEnvironmentVariable (L"CASROOT");
+	CString initdir = (CASROOTValue + "\\..\\data\\iges");
+
+	dlg.m_ofn.lpstrInitialDir = initdir;
+	if (dlg.DoModal() == IDOK) 
+	{
+		SetCursor(AfxGetApp()->LoadStandardCursor(IDC_WAIT));
+		TCollection_ExtendedString aFileNameW ((Standard_ExtString )(const wchar_t* )dlg.GetPathName());
+		TCollection_AsciiString    aFileName  (aFileNameW, '?');
+		OSD_Path aFile(aFileName.ToCString());
+
+		Handle(StlMesh_Mesh) aSTLMesh = RWStl::ReadFile(aFile);
+
+		TopoDS_Compound ResultShape;
+		BRep_Builder CompoundBuilder;
+		CompoundBuilder.MakeCompound(ResultShape);
+
+		Standard_Integer NumberDomains = aSTLMesh->NbDomains();
+		Standard_Integer iND=1;
+		gp_XYZ p1, p2, p3;
+		TopoDS_Vertex Vertex1, Vertex2, Vertex3;
+		TopoDS_Face AktFace;
+		TopoDS_Wire AktWire;
+		BRep_Builder B;
+		Standard_Real x1, y1, z1;
+		Standard_Real x2, y2, z2;
+		Standard_Real x3, y3, z3;
+		StlMesh_MeshExplorer aMExp (aSTLMesh);
+			for (aMExp.InitTriangle (iND); aMExp.MoreTriangle (); aMExp.NextTriangle ())
+			{
+				aMExp.TriangleVertices (x1,y1,z1,x2,y2,z2,x3,y3,z3);
+				p1.SetCoord(x1,y1,z1);
+				p2.SetCoord(x2,y2,z2);
+				p3.SetCoord(x3,y3,z3);
+
+				if ((!(p1.IsEqual(p2,0.0))) && (!(p1.IsEqual(p3,0.0))))
+				{
+					Vertex1 = BRepBuilderAPI_MakeVertex(p1);
+					Vertex2 = BRepBuilderAPI_MakeVertex(p2);
+					Vertex3 = BRepBuilderAPI_MakeVertex(p3);
+
+					AktWire = BRepBuilderAPI_MakePolygon( Vertex1, Vertex2, Vertex3, Standard_True);
+
+					if( !AktWire.IsNull())
+					{
+						AktFace = BRepBuilderAPI_MakeFace( AktWire);
+						if(!AktFace.IsNull())
+							CompoundBuilder.Add(ResultShape,AktFace);
+					}
+				}
+			}
+		TopoDS_Shape aShape = ResultShape;
+		Handle(AIS_Shape) ais1 = new AIS_Shape(aShape);
+		myAISContext->SetColor(ais1,Quantity_NOC_AZURE,Standard_False); 
+		myAISContext->SetMaterial(ais1,Graphic3d_NOM_PLASTIC,Standard_False);    
+		myAISContext->Display(ais1,Standard_False);
+		Fit();
+		SetCursor(AfxGetApp()->LoadStandardCursor(IDC_ARROW));
+	}
+}
+void CNTU_OCCT_v2Doc::OnFileExportStl()
+{
+	CImportExport::SaveSTL(myAISContext);
 }

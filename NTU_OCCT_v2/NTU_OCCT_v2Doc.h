@@ -45,15 +45,22 @@ protected:
 	afx_msg void OnCylinder();
 	afx_msg void OnSphere();
 	afx_msg void OnRotate();
+	afx_msg void OnTorus();
 	afx_msg void OnRobot();
 	afx_msg void OnTranslation();
 	// Import Export
-	//afx_msg void OnFileImportCSFDB();
-	//afx_msg void OnFileExportCSFDB();
+	afx_msg void OnFileImportCSFDB();
+	afx_msg void OnFileExportCSFDB();
 	afx_msg void OnFileImportIges();
-	//afx_msg void OnFileExportIges();
-	//afx_msg void OnFileImportStep();
-	//afx_msg void OnFileExportStep();
+	afx_msg void OnFileExportIges();
+	afx_msg void OnFileImportStep();
+	afx_msg void OnFileExportStep();
+	afx_msg void OnFileImportBrep();
+	afx_msg void OnFileExportBrep();
+
+	afx_msg void OnFileExportVrml();
+	afx_msg void OnFileImportStl();
+	afx_msg void OnFileExportStl();
 
 protected:
 	DECLARE_MESSAGE_MAP()

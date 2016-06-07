@@ -40,6 +40,7 @@
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <BRepAlgo.hxx>
 #include <BRep_Builder.hxx>
+
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepPrimAPI_MakeSphere.hxx>
 #include <BRepPrimAPI_MakeWedge.hxx>
@@ -47,7 +48,9 @@
 #include <BRepPrimAPI_MakeTorus.hxx>
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
+#include <BRepBuilderAPI_MakePolygon.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
+#include <BRepBuilderAPI_Sewing.hxx>
 #include <BRepTools.hxx>
 #include <Bnd_Box2d.hxx>
 #include <BndLib.hxx>
@@ -166,6 +169,11 @@
 
 #include <IntAna_IntConicQuad.hxx>
 
+//#include <MeshVS_Mesh.hxx>
+//#include <MeshVS_DrawerAttribute.hxx>
+//#include <MeshVS_MeshPrsBuilder.hxx>
+
+#include <OSD_Path.hxx>
 #include <OSD_Environment.hxx>
 #include <OpenGl_GraphicDriver.hxx>
 
@@ -180,6 +188,8 @@
 #include <Prs3d_IsoAspect.hxx>
 #include <Prs3d_TextAspect.hxx>
 #include <Prs3d_PointAspect.hxx>
+
+#include <RWStl.hxx>
 
 #include <SelectMgr_EntityOwner.hxx>
 #include <SelectMgr_SelectableObject.hxx>
@@ -197,6 +207,9 @@
 #include <StdPrs_Curve.hxx>
 #include <StdPrs_PoleCurve.hxx>
 #include <Standard_ErrorHandler.hxx>
+#include <StlAPI_Reader.hxx>
+#include <StlMesh_Mesh.hxx>
+#include <StlMesh_MeshExplorer.hxx>
 
 #include <TColStd_MapIteratorOfMapOfTransient.hxx>
 #include <TColgp_Array1OfPnt.hxx>
@@ -226,6 +239,7 @@
 #include <V3d_Viewer.hxx>
 #include <V3d_View.hxx>
 #include <WNT_Window.hxx>
+#include <XSDRAWSTLVRML_DataSource.hxx>
 
 
 
