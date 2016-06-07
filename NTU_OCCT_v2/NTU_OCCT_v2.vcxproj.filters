@@ -28,6 +28,15 @@
     <None Include="res\Toolbar.bmp">
       <Filter>資源檔</Filter>
     </None>
+    <None Include="res\toolbar1.bmp">
+      <Filter>資源檔</Filter>
+    </None>
+    <None Include="..\res\AIS_TB.bmp">
+      <Filter>資源檔</Filter>
+    </None>
+    <None Include="res\AIS_TB.bmp">
+      <Filter>資源檔</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NTU_OCCT_v2.h">

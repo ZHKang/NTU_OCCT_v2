@@ -27,8 +27,9 @@ public:
 	virtual int ExitInstance();
 
 // Implementation
-	afx_msg void OnAppAbout();
 	DECLARE_MESSAGE_MAP()
+private:
+	CToolBar *m_ImpExpToolbar;
 };
 
 extern CNTU_OCCT_v2App theApp;

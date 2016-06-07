@@ -6,11 +6,12 @@
 
 #include "NTU_OCCT_v2.h"
 #include "NTU_OCCT_v2Doc.h"
+#include "Resource.h"
 
 #include <propkey.h>
 
 #include <Geom_Axis1Placement.hxx>
-#include <AIS_Axis.hxx>
+#include <ImportExport/ImportExport.h>
 
 
 // CNTU_OCCT_v2Doc
@@ -24,6 +25,12 @@ BEGIN_MESSAGE_MAP(CNTU_OCCT_v2Doc, OCC_3dBaseDoc)
 	ON_COMMAND(ID_Rotation,OnRotate)
 	ON_COMMAND(ID_Robot,OnRobot)
 	ON_COMMAND(ID_TRANSLATION,OnTranslation)
+	//ON_COMMAND(ID_FILE_IMPORT_CSFDB, OnFileImportCSFDB)
+	//ON_COMMAND(ID_FILE_EXPORT_CSFDB, OnFileExportCSFDB)
+	ON_COMMAND(ID_FILE_IMPORT_IGES, OnFileImportIges)
+	//ON_COMMAND(ID_FILE_EXPORT_IGES, OnFileExportIges)
+	//ON_COMMAND(ID_FILE_IMPORT_STEP, OnFileImportStep)
+	//ON_COMMAND(ID_FILE_EXPORT_STEP, OnFileExportStep)
 END_MESSAGE_MAP()
 
 
@@ -177,6 +184,7 @@ void CNTU_OCCT_v2Doc::OnSphere()
 		myAISContext->Display(mySphere);
 		TCollection_AsciiString Message("BRepPrimAPI_MakeSphere S(gp_Pnt(0,300,0), 100.);\n");
 		PocessTextInDialog("Create Sphere",Message);
+		Fit();
 	}
 }
 
@@ -249,5 +257,28 @@ void CNTU_OCCT_v2Doc::OnTranslation()
 	//myAISContext->Display(ais2,Standard_False);
 
 	//Fit();
+
+}
+void CNTU_OCCT_v2Doc::OnFileImportIges()
+{
+	TopoDS_ListOfShape   m_shapeList;
+	Handle(TopTools_HSequenceOfShape) IgesSequence = CImportExport::ReadIGES();
+	for(int i=1;i<= IgesSequence->Length();i++)
+	{
+		m_shapeList.Append(IgesSequence->Value(i));
+		for (TopoDS_ListIteratorOfListOfShape iter(m_shapeList); iter.More(); iter.Next())
+		{
+			Handle(AIS_Shape) ais = new AIS_Shape(iter.Value());
+			myAISContext->Display(ais, Standard_False);
+		}
+	}
+
+	//for ( TopoDS_ListIteratorOfListOfShape iter(m_shapeList); iter.More(); iter.Next() )
+	//{
+	//	Handle(AIS_Shape) ais = new AIS_Shape(iter.Value());
+	//	myAISContext->Display(ais, Standard_False);
+	//}
+
+	Fit();
 
 }

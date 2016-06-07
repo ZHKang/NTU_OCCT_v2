@@ -47,6 +47,13 @@ protected:
 	afx_msg void OnRotate();
 	afx_msg void OnRobot();
 	afx_msg void OnTranslation();
+	// Import Export
+	//afx_msg void OnFileImportCSFDB();
+	//afx_msg void OnFileExportCSFDB();
+	afx_msg void OnFileImportIges();
+	//afx_msg void OnFileExportIges();
+	//afx_msg void OnFileImportStep();
+	//afx_msg void OnFileExportStep();
 
 protected:
 	DECLARE_MESSAGE_MAP()

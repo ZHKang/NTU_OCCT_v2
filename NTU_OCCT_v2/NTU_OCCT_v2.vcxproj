@@ -98,11 +98,14 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="..\res\AIS_TB.bmp" />
     <None Include="ReadMe.txt" />
+    <None Include="res\AIS_TB.bmp" />
     <None Include="res\NTU_OCCT_v2.ico" />
     <None Include="res\NTU_OCCT_v2.rc2" />
     <None Include="res\NTU_OCCT_v2Doc.ico" />
     <None Include="res\Toolbar.bmp" />
+    <None Include="res\toolbar1.bmp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChildFrm.h" />

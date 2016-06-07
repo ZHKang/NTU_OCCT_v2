@@ -3,9 +3,10 @@
 //
 
 #include "stdafx.h"
-#include "afxwinappex.h"
-#include "afxdialogex.h"
+//#include "afxwinappex.h"
+//#include "afxdialogex.h"
 #include "NTU_OCCT_v2.h"
+#include "Resource.h"
 #include "MainFrm.h"
 
 #include "ChildFrm.h"
@@ -15,11 +16,6 @@
 #include "OCC_MainFrame.h"
 #include "OCC_3dChildFrame.h"
 #include "OCC_3dView.h"
-
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#endif
-
 
 // CNTU_OCCT_v2App
 
@@ -88,6 +84,7 @@ BOOL CNTU_OCCT_v2App::InitInstance()
 	AddDocTemplate(pDocTemplate);
 
 	// create main MDI Frame window
+	//CMainFrame* pMainFrame = new CMainFrame();
 	OCC_MainFrame* pMainFrame = new OCC_MainFrame(with_AIS_TB);
 	if (!pMainFrame || !pMainFrame->LoadFrame(IDR_MAINFRAME))
 	{
@@ -95,6 +92,17 @@ BOOL CNTU_OCCT_v2App::InitInstance()
 		return FALSE;
 	}
 	m_pMainWnd = pMainFrame;
+
+
+	m_ImpExpToolbar = new CToolBar;
+	if ( !m_ImpExpToolbar->Create(m_pMainWnd, WS_CHILD |  WS_VISIBLE | CBRS_TOP | CBRS_TOOLTIPS) ||
+		!m_ImpExpToolbar->LoadToolBar(IDR_ImpExpToolbar))
+	{
+		TRACE0("Failed to create toolbar\n");
+		return FALSE;
+	}
+	m_ImpExpToolbar->EnableDocking(CBRS_ALIGN_ANY);
+	//EnableDocking(CBRS_ALIGN_ANY);
 	// call DragAcceptFiles only if there's a suffix
 	//  In an MDI app, this should occur immediately after setting m_pMainWnd
 
@@ -114,54 +122,10 @@ BOOL CNTU_OCCT_v2App::InitInstance()
 
 	return TRUE;
 }
-
 int CNTU_OCCT_v2App::ExitInstance()
 {
 	//TODO: handle additional resources you may have added
 	return CWinApp::ExitInstance();
 }
-
-// CNTU_OCCT_v2App message handlers
-
-
-// CAboutDlg dialog used for App About
-
-class CAboutDlg : public CDialogEx
-{
-public:
-	CAboutDlg();
-
-// Dialog Data
-	enum { IDD = IDD_ABOUTBOX };
-
-protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-
-// Implementation
-protected:
-	DECLARE_MESSAGE_MAP()
-};
-
-CAboutDlg::CAboutDlg() : CDialogEx(CAboutDlg::IDD)
-{
-}
-
-void CAboutDlg::DoDataExchange(CDataExchange* pDX)
-{
-	CDialogEx::DoDataExchange(pDX);
-}
-
-BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
-END_MESSAGE_MAP()
-
-// App command to run the dialog
-void CNTU_OCCT_v2App::OnAppAbout()
-{
-	CAboutDlg aboutDlg;
-	aboutDlg.DoModal();
-}
-
-// CNTU_OCCT_v2App message handlers
-
 
 

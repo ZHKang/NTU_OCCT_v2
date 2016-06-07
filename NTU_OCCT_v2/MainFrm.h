@@ -19,6 +19,7 @@ public:
 // Overrides
 public:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	void DockControlBarLeftOf(CToolBar* Bar, CToolBar* LeftOf);
 
 // Implementation
 public:
@@ -30,7 +31,10 @@ public:
 
 protected:  // control bar embedded members
 	CToolBar          m_wndToolBar;
+	CToolBar          m_ImpExpToolbar;
+	CToolBar          m_AIS_TB;
 	CStatusBar        m_wndStatusBar;
+
 
 // Generated message map functions
 protected:
