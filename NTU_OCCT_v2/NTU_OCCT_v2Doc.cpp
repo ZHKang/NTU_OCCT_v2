@@ -138,7 +138,7 @@ void CNTU_OCCT_v2Doc::Serialize(CArchive& ar)
 #ifdef _DEBUG
 void CNTU_OCCT_v2Doc::AssertValid() const
 {
-	CDocument::AssertValid();
+	//CDocument::AssertValid();
 }
 
 void CNTU_OCCT_v2Doc::Dump(CDumpContext& dc) const
@@ -230,32 +230,40 @@ void CNTU_OCCT_v2Doc::OnRotate()
 }
 void CNTU_OCCT_v2Doc::OnRobot()
 {
+	CFileDialog dlg(TRUE,
+		NULL,
+		NULL,
+		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+		L"STL Files (*.STL, *.stl)|*.STL; *.stl|All Files (*.*)|*.*||",
+		NULL );
+	if (dlg.DoModal() == IDOK) 
+	{
+		SetCursor(AfxGetApp()->LoadStandardCursor(IDC_WAIT));
+		TCollection_ExtendedString aFileNameW ((Standard_ExtString )(const wchar_t* )dlg.GetPathName());
+		TCollection_AsciiString    aFileName  (aFileNameW, '?');
+		OSD_Path aFile(aFileName.ToCString());
+		Handle(StlMesh_Mesh) aSTLMesh = RWStl::ReadFile(aFile);
+		// Fast Use MeshVS
+		Handle_MeshVS_Mesh aMesh = new MeshVS_Mesh();
+		Handle( XSDRAWSTLVRML_DataSource ) aDS = new XSDRAWSTLVRML_DataSource( aSTLMesh );
+
+		aMesh->SetDataSource(aDS);
+		aMesh->AddBuilder( new MeshVS_MeshPrsBuilder( aMesh), Standard_True );//False -> No selection
+
+		aMesh->GetDrawer()->SetBoolean(MeshVS_DA_DisplayNodes,Standard_False); //MeshVS_DrawerAttribute
+		aMesh->GetDrawer()->SetBoolean(MeshVS_DA_ShowEdges,Standard_False);
+		aMesh->GetDrawer()->SetMaterial(MeshVS_DA_FrontMaterial,Graphic3d_NameOfMaterial::Graphic3d_NOM_GOLD);
+
+		aMesh->SetColor(Quantity_NOC_AZURE);
+		aMesh->SetDisplayMode( MeshVS_DMF_Shading ); // Mode as defaut
+		aMesh->SetHilightMode( MeshVS_DMF_WireFrame ); // Wireframe as default hilight mode
+		myAISContext->Display(aMesh);
+	}
+	Fit();
 
 }
 void CNTU_OCCT_v2Doc::OnTranslation()
 {
-	//TopoDS_Shape S = BRepPrimAPI_MakeWedge(6.,10.,8.,2.).Shape(); 
-	//Handle(AIS_Shape) ais1 = new AIS_Shape(S);
-	//myAISContext->SetColor(ais1,Quantity_NOC_GREEN,Standard_False); 
-	//myAISContext->SetMaterial(ais1,Graphic3d_NOM_PLASTIC,Standard_False);
-	//myAISContext->Display(ais1,Standard_False);
-	//gp_Trsf theTransformation;
-	//gp_Vec theVectorOfTranslation(-6,-6,6);
-
-	//Handle (ISession_Direction) aDirection1 = new ISession_Direction(gp_Pnt(0,0,0),theVectorOfTranslation);
-	//myAISContext->Display(aDirection1,Standard_False);
-
-	//theTransformation.SetTranslation(theVectorOfTranslation);
-	//BRepBuilderAPI_Transform myBRepTransformation(S,theTransformation);
-	//TopoDS_Shape S2 = myBRepTransformation.Shape();
-
-	//Handle(AIS_Shape) ais2 = new AIS_Shape(S2);
-	//myAISContext->SetColor(ais2,Quantity_NOC_BLUE1,Standard_False); 
-	//myAISContext->SetMaterial(ais2,Graphic3d_NOM_PLASTIC,Standard_False);   
-	//myAISContext->Display(ais2,Standard_False);
-
-	//Fit();
-
 }
 void CNTU_OCCT_v2Doc::OnFileImportBrep()
 {

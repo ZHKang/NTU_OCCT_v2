@@ -1,24 +1,24 @@
-
 // stdafx.h : include file for standard system include files,
-// or project specific include files that are used frequently,
-// but are changed infrequently
+//  or project specific include files that are used frequently, but
+//      are changed infrequently
+//
 
+#if _MSC_VER >= 1000
 #pragma once
+#endif // _MSC_VER >= 1000
 
-//#ifndef _SECURE_ATL
-//#define _SECURE_ATL 1
-//#endif
-
-#ifndef VC_EXTRALEAN
-#define VC_EXTRALEAN            // Exclude rarely-used stuff from Windows headers
-#endif
+#define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
 
 #include <afxwin.h>         // MFC core and standard components
 #include <afxext.h>         // MFC extensions
 #include <afxdisp.h>        // MFC OLE automation classes
 #ifndef _AFX_NO_AFXCMN_SUPPORT
-#include <afxcmn.h>             // MFC support for Windows Common Controls
+#include <afxcmn.h>			// MFC support for Windows Common Controls
 #endif // _AFX_NO_AFXCMN_SUPPORT
+
+#if !defined(WNT)
+#error WNT precompiler directive is mandatory for CasCade 
+#endif
 
 
 #pragma warning(  disable : 4244 )        // Issue warning 4244
@@ -26,7 +26,6 @@
 #pragma warning(  default : 4244 )        // Issue warning 4244
 #include <Standard.hxx>
 #include <Standard_PrimitiveTypes.hxx>
-
 
 
 #include <AIS_InteractiveContext.hxx>
@@ -169,9 +168,13 @@
 
 #include <IntAna_IntConicQuad.hxx>
 
-//#include <MeshVS_Mesh.hxx>
-//#include <MeshVS_DrawerAttribute.hxx>
-//#include <MeshVS_MeshPrsBuilder.hxx>
+#include <MeshVS_Mesh.hxx>
+#include <MeshVS_MeshPrsBuilder.hxx>
+#include <MeshVS_Drawer.hxx>
+#include <MeshVS_DrawerAttribute.hxx>
+
+#include <StlMesh_Mesh.hxx>
+#include <StlMesh_MeshExplorer.hxx>
 
 #include <OSD_Path.hxx>
 #include <OSD_Environment.hxx>
