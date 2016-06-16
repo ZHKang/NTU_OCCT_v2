@@ -16,6 +16,14 @@
 #include <Quantity_HArray1OfColor.hxx>
 #include <TColStd_HArray1OfReal.hxx>
 
+#include <StlMesh_Mesh.hxx>
+#include <OSD_Path.hxx>
+#include <MeshVS_Mesh.hxx>
+#include <XSDRAWSTLVRML_DataSource.hxx>
+#include <MeshVS_Drawer.hxx>
+#include <MeshVS_DrawerAttribute.hxx>
+#include <MeshVS_MeshPrsBuilder.hxx>
+
 #include <Standard_Macro.hxx>
 
 class Standard_EXPORT CImportExport  
@@ -26,74 +34,61 @@ public:
 	virtual ~CImportExport(){};
 
 private :
-    static Handle(TopTools_HSequenceOfShape) 
-        BuildSequenceFromContext(const Handle(AIS_InteractiveContext)& anInteractiveContext,
-                                 Handle(Quantity_HArray1OfColor)&      anArrayOfColors,
-                                 Handle(TColStd_HArray1OfReal)&        anArrayOfTransparencies);
+	static Handle(TopTools_HSequenceOfShape) 
+		BuildSequenceFromContext(const Handle(AIS_InteractiveContext)& anInteractiveContext,
+		Handle(Quantity_HArray1OfColor)&      anArrayOfColors,
+		Handle(TColStd_HArray1OfReal)&        anArrayOfTransparencies);
 
 public :
 
-    //======================================================================
-    // return is HSequence to be able to select a set of files
-    static int ReadBREP(const Handle_AIS_InteractiveContext& anInteractiveContext);
-    static Handle_TopTools_HSequenceOfShape ReadBREP();
-    static Standard_Boolean ReadBREP(CString      aFileName,
-                                    TopoDS_Shape& aShape);
+	//======================================================================
+	// return is HSequence to be able to select a set of files
+	static int ReadBREP(const Handle_AIS_InteractiveContext& anInteractiveContext);
+	static Handle_TopTools_HSequenceOfShape ReadBREP();
+	static Standard_Boolean ReadBREP(CString      aFileName,
+		TopoDS_Shape& aShape);
 
-    //----------------------------------------------------------------------
-    static void SaveBREP(const Handle_AIS_InteractiveContext& anInteractiveContext);
-    static Standard_Boolean SaveBREP(const TopoDS_Shape& aShape);
-    static Standard_Boolean SaveBREP(CString aFileName,
-                                    const TopoDS_Shape& aShape);
+	//----------------------------------------------------------------------
+	static void SaveBREP(const Handle_AIS_InteractiveContext& anInteractiveContext);
+	static Standard_Boolean SaveBREP(const TopoDS_Shape& aShape);
+	static Standard_Boolean SaveBREP(CString aFileName,
+		const TopoDS_Shape& aShape);
 
+	//======================================================================
 
-    static TCollection_AsciiString BuildStorageErrorMessage( Storage_Error anError);
-
-    static void ReadCSFDB(const Handle(AIS_InteractiveContext)& anInteractiveContext);
-	static Handle(TopTools_HSequenceOfShape) ReadCSFDB(); // not by reference --> the sequence is created here !!
-    static Standard_Boolean ReadCSFDB(const Standard_CString& aFileName,
-                                      Handle(TopTools_HSequenceOfShape)& aHSequenceOfShape, // out parameter
-                                      TCollection_AsciiString& ReturnMessage);// out parameter
-    //----------------------------------------------------------------------
-
-    static void SaveCSFDB(const Handle(AIS_InteractiveContext)& anInteractiveContext);
-    static Standard_Boolean SaveCSFDB(const Handle(TopTools_HSequenceOfShape)& aHSequenceOfShape);
-    static Standard_Boolean SaveCSFDB(const Standard_CString& aFileName,
-                                      const Handle(TopTools_HSequenceOfShape)& aHSequenceOfShape,
-                                      TCollection_AsciiString& ReturnMessage, // out parameter
-                                      const MgtBRep_TriangleMode aTriangleMode = MgtBRep_WithTriangle);
-    //======================================================================
-
-    static void ReadIGES(const Handle(AIS_InteractiveContext)& anInteractiveContext);
+	static void ReadIGES(const Handle(AIS_InteractiveContext)& anInteractiveContext);
 	static Handle(TopTools_HSequenceOfShape) ReadIGES(); // not by reference --> the sequence is created here !!
-    static Standard_Integer ReadIGES(const Standard_CString& aFileName,
-                                     Handle(TopTools_HSequenceOfShape)& aHSequenceOfShape);
-    //----------------------------------------------------------------------
-    static void SaveIGES(const Handle(AIS_InteractiveContext)& anInteractiveContext);
-    static Standard_Boolean SaveIGES(const Handle(TopTools_HSequenceOfShape)& aHSequenceOfShape);
-    static Standard_Boolean SaveIGES(const Standard_CString& aFileName,
-                                     const Handle(TopTools_HSequenceOfShape)& aHSequenceOfShape);
+	static Standard_Integer ReadIGES(const Standard_CString& aFileName,
+		Handle(TopTools_HSequenceOfShape)& aHSequenceOfShape);
+	//----------------------------------------------------------------------
+	static void SaveIGES(const Handle(AIS_InteractiveContext)& anInteractiveContext);
+	static Standard_Boolean SaveIGES(const Handle(TopTools_HSequenceOfShape)& aHSequenceOfShape);
+	static Standard_Boolean SaveIGES(const Standard_CString& aFileName,
+		const Handle(TopTools_HSequenceOfShape)& aHSequenceOfShape);
 
-    //======================================================================
+	//======================================================================
 
-    static void ReadSTEP(const Handle(AIS_InteractiveContext)& anInteractiveContext);
+	static void ReadSTEP(const Handle(AIS_InteractiveContext)& anInteractiveContext);
 	static Handle(TopTools_HSequenceOfShape) ReadSTEP(); // not by reference --> the sequence is created here !!
-	//static Handle(TopTools_HSequenceOfShape) ReadSTEP(TCollection_ExtendedString aFileNameW); // not by reference --> the sequence is created here !!
-    static IFSelect_ReturnStatus ReadSTEP(const Standard_CString& aFileName,
-                                          Handle(TopTools_HSequenceOfShape)& aHSequenceOfShape);
-    //----------------------------------------------------------------------
-    static void SaveSTEP(const Handle(AIS_InteractiveContext)& anInteractiveContext);
-    static IFSelect_ReturnStatus SaveSTEP(const Handle(TopTools_HSequenceOfShape)& aHSequenceOfShape);
-    static IFSelect_ReturnStatus SaveSTEP(const Standard_CString& aFileName,
-                                          const Handle(TopTools_HSequenceOfShape)& aHSequenceOfShape,
+	static IFSelect_ReturnStatus ReadSTEP(const Standard_CString& aFileName,
+		Handle(TopTools_HSequenceOfShape)& aHSequenceOfShape);
+	//----------------------------------------------------------------------
+	static void SaveSTEP(const Handle(AIS_InteractiveContext)& anInteractiveContext);
+	static IFSelect_ReturnStatus SaveSTEP(const Handle(TopTools_HSequenceOfShape)& aHSequenceOfShape);
+	static IFSelect_ReturnStatus SaveSTEP(const Standard_CString& aFileName,
+		const Handle(TopTools_HSequenceOfShape)& aHSequenceOfShape,
 
-                                          const STEPControl_StepModelType aValue = STEPControl_AsIs);
+		const STEPControl_StepModelType aValue = STEPControl_AsIs);
 
-    static void ReadSAT(const Handle(AIS_InteractiveContext)& anInteractiveContext);
+	static void ReadSAT(const Handle(AIS_InteractiveContext)& anInteractiveContext);
 	static Handle(TopTools_HSequenceOfShape) ReadSAT(); // not by reference --> the sequence is created here !!
 	static IFSelect_ReturnStatus ReadSAT(const Standard_CString& aFileName,
-                                         Handle(TopTools_HSequenceOfShape)& aHSequenceOfShape);	
+		Handle(TopTools_HSequenceOfShape)& aHSequenceOfShape);	
     //----------------------------------------------------------------------
+	static void ReadSTL(const Handle(AIS_InteractiveContext)& anInteractiveContext);
+	static Handle(MeshVS_Mesh) ReadSTL();
+	static Standard_Boolean ReadSTL(const Standard_CString& aFileName, Handle(MeshVS_Mesh)& aMesh);
+
 	static Standard_Boolean SaveSTL(const Standard_CString& aFileName,
                                           const Handle(TopTools_HSequenceOfShape)& aHSequenceOfShape,
                                           TCollection_AsciiString& ReturnMessage);

@@ -6,8 +6,6 @@
 #include "ImportExport.h"
 #include <OCC_App.h>
 
-#include "SaveCSFDBDlg.h"
-
 #include "SaveSTEPDlg.h"
 
 #include "TColStd_SequenceOfAsciiString.hxx"
@@ -18,14 +16,6 @@
 #include "STEPControl_Controller.hxx"
 
 #include <BRepAlgo.hxx>
-#include <FSD_File.hxx>
-#include <ShapeSchema.hxx>
-#include <PTopoDS_HShape.hxx>
-#include <Storage_HSeqOfRoot.hxx>
-#include <Storage_Root.hxx>
-#include <PTColStd_PersistentTransientMap.hxx>
-#include <MgtBRep.hxx>
-#include <PTColStd_TransientPersistentMap.hxx>
 #include <IGESControl_Controller.hxx>
 #include <IGESControl_Writer.hxx>
 #include <Interface_Static.hxx>
@@ -35,6 +25,10 @@
 #include <TopoDS_Compound.hxx>
 #include <Geom_Line.hxx>
 #include <StlAPI_Writer.hxx>
+#include <StlAPI_Reader.hxx>
+#include <RWStl.hxx>
+#include <XSControl_WorkSession.hxx>
+
 #include <VrmlAPI_Writer.hxx>
 #include <VrmlData_Scene.hxx>
 #include <VrmlData_ShapeConvert.hxx>
@@ -44,11 +38,11 @@
 #include <VrmlData_ListOfNode.hxx>
 #include <VrmlData_ShapeNode.hxx>
 
-#include <XSControl_WorkSession.hxx>
 #include <STEPConstruct_Styles.hxx>
 #include <TColStd_HSequenceOfTransient.hxx>
 #include <STEPConstruct.hxx>
 #include <StepVisual_StyledItem.hxx>
+#include <XSDRAWSTLVRML_DataSource.hxx>
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -102,12 +96,12 @@ Handle(TopTools_HSequenceOfShape) CImportExport::BuildSequenceFromContext(const 
 //=                                                                    =
 //======================================================================
 
-int CImportExport::ReadBREP (const Handle_AIS_InteractiveContext& anInteractiveContext)
+int CImportExport::ReadBREP (const Handle(AIS_InteractiveContext)& anInteractiveContext)
 {
     Handle(TopTools_HSequenceOfShape) aSequence = CImportExport::ReadBREP();
 	if(aSequence->IsEmpty())
 		return 1;
-	Handle_AIS_Shape aShape;
+	Handle(AIS_Shape) aShape;
     for(int i=1;i<= aSequence->Length();i++){
 		aShape = new AIS_Shape(aSequence->Value(i));
 		anInteractiveContext->SetDisplayMode(aShape, 1, Standard_False);
@@ -126,9 +120,9 @@ Handle(TopTools_HSequenceOfShape) CImportExport::ReadBREP()
 		  L"BREP Files (*.brep , *.rle)|*.brep;  *.BREP; *.rle; *.RLE; |All Files (*.*)|*.*||",
 		  NULL ); 
 
-  CString CASROOTValue;
-  CASROOTValue.GetEnvironmentVariable (L"CASROOT");
-  CString initdir = (CASROOTValue + "\\..\\data\\occ");
+  CString SHAREPATHValue;
+  SHAREPATHValue.GetEnvironmentVariable (L"CSF_OCCTDataPath");
+  CString initdir = (SHAREPATHValue + "\\occ");
 
   dlg.m_ofn.lpstrInitialDir = initdir;
 
@@ -174,7 +168,7 @@ Standard_Boolean CImportExport::ReadBREP(CString      aFileName,
   return !aShape.IsNull();
 }
 
-void CImportExport::SaveBREP(const Handle_AIS_InteractiveContext& anInteractiveContext)
+void CImportExport::SaveBREP(const Handle(AIS_InteractiveContext)& anInteractiveContext)
 {
 	anInteractiveContext->InitCurrent();
 	if (anInteractiveContext->NbCurrents() == 0){
@@ -211,9 +205,9 @@ Standard_Boolean CImportExport::SaveBREP(const TopoDS_Shape& aShape)
   CFileDialog dlg (FALSE, L"*.brep",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
                    L"BREP Files (*.brep)|*.brep;|BREP Files (*.BREP)|*.BREP;||", NULL);
   
-CString CASROOTValue;
-CASROOTValue.GetEnvironmentVariable (L"CASROOT");
-CString initdir = (CASROOTValue + "\\..\\data\\occ");
+CString SHAREPATHValue;
+SHAREPATHValue.GetEnvironmentVariable (L"CSF_OCCTDataPath");
+CString initdir = (SHAREPATHValue + "\\occ");
 
 dlg.m_ofn.lpstrInitialDir = initdir;
 
@@ -247,319 +241,6 @@ Standard_Boolean CImportExport::SaveBREP (CString             aFileName,
   return Standard_True;
 }
 
-
-//======================================================================
-//=                                                                    =
-//=                      CSFDB                                         =
-//=                                                                    =
-//======================================================================
-
-
-TCollection_AsciiString CImportExport::BuildStorageErrorMessage( Storage_Error anError)
-
-{ 
-    TCollection_AsciiString aMessage("Storage Status :");
-    switch ( anError ) {
-        case Storage_VSOk : 
-            aMessage += "no problem \n";
-        break;
-        case Storage_VSOpenError : 
-        aMessage += "OpenError while opening the stream \n";
-        break;
-        case Storage_VSModeError : 
-            aMessage += "the stream is opened with a wrong mode for operation \n";
-        break;
-        case Storage_VSCloseError : 
-            aMessage += "CloseError while closing the stream \n";
-        break;
-        case Storage_VSAlreadyOpen : 
-            aMessage += "stream is already opened \n";
-        break;
-        case Storage_VSNotOpen : 
-            aMessage += "stream not opened \n";
-        break;
-        case Storage_VSSectionNotFound : 
-            aMessage += "the section is not found \n";
-        break;
-        case Storage_VSWriteError : 
-            aMessage += "error during writing \n";
-        break;
-        case Storage_VSFormatError : 
-            aMessage += "wrong format error occured while reading \n";
-        break;
-        case Storage_VSUnknownType : 
-            aMessage += "try to read an unknown type \n";
-        break;
-        case Storage_VSTypeMismatch : 
-            aMessage += "try to read a wrong primitive type (read a char while expecting a real) \n";
-        break;
-        case Storage_VSInternalError : 
-            aMessage += "internal error \n ";
-        break;
-        case Storage_VSExtCharParityError : 
-            aMessage += "problem with 16bit characters, may be an 8bit character is inserted inside a 16bit string \n";
-        break;
-        default :
-            aMessage += "Unknown Status ";
-            aMessage += anError;
-            aMessage += " \n";
-        break;
-    }
-    return aMessage;
-}
-
-void CImportExport::ReadCSFDB(const Handle(AIS_InteractiveContext)& anInteractiveContext)
-{
-    Handle(TopTools_HSequenceOfShape) aSequence = CImportExport::ReadCSFDB();
-    for(int i=1;i<= aSequence->Length();i++)
-        anInteractiveContext->Display(new AIS_Shape(aSequence->Value(i)), Standard_False);
-}
-
-Handle(TopTools_HSequenceOfShape) CImportExport::ReadCSFDB() // not by reference --> the sequence is created here !!
-{
-  CFileDialog dlg(TRUE,
-                  NULL,
-                  NULL,
-                  OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
-                  L"CSFDB Files (*.CSFDB , *.csf)|*.csfdb;  *.csf; |All Files (*.*)|*.*||", 
-                  NULL );
-
-CString CASROOTValue;
-CASROOTValue.GetEnvironmentVariable(L"CASROOT");
-CString initdir = (CASROOTValue + "\\..\\data\\csfdb");
-
-dlg.m_ofn.lpstrInitialDir = initdir;
-  
-  Handle(TopTools_HSequenceOfShape) aSequence = new TopTools_HSequenceOfShape();;
-  if (dlg.DoModal() == IDOK) 
-  {
-    SetCursor(AfxGetApp()->LoadStandardCursor(IDC_WAIT));
-    TCollection_ExtendedString aFileNameW ((Standard_ExtString )(const wchar_t* )dlg.GetPathName());
-    TCollection_AsciiString    aFileName  (aFileNameW, '?');
-    TCollection_AsciiString Message;
-    Standard_Boolean result = ReadCSFDB (aFileName.ToCString(), aSequence, Message);
-    CString aMsg (Message.ToCString());
-    MessageBoxW(AfxGetApp()->m_pMainWnd->m_hWnd, aMsg, result ? L"CasCade" : L"CasCade Error", result ? MB_OK : MB_ICONERROR);
-    SetCursor(AfxGetApp()->LoadStandardCursor(IDC_ARROW));
-  }
-  return aSequence;
-}
-
-Standard_Boolean CImportExport::ReadCSFDB(const Standard_CString& aFileName,
-                                          Handle(TopTools_HSequenceOfShape)& aHSequenceOfShape, // out parameter
-                                          TCollection_AsciiString& ReturnMessage)               // out parameter
-{
-    // an I/O driver
-    FSD_File f;
-
-    // the applicative Schema
-    Handle(ShapeSchema) s = new ShapeSchema;
-
-    // a Read/Write data object
-    Handle(Storage_Data) d = new Storage_Data;
-
-    d->ClearErrorStatus();
-
-    // Check file type
-    if ( FSD_File::IsGoodFileType( aFileName ) != Storage_VSOk)  {
-    ReturnMessage = "Bad file type for ";
-    ReturnMessage += aFileName;
-    ReturnMessage += " \n";
-    return Standard_False;
-    }
-
-    // Open the archive, Read mode
-    Storage_Error err = f.Open(aFileName, Storage_VSRead);
-    // Read all the persistent object in the file with the schema
-    if ( err != Storage_VSOk ) {
-      ReturnMessage += BuildStorageErrorMessage(d->ErrorStatus());
-      return Standard_False;
-    }
-
-    d = s->Read( f );
-	err = d->ErrorStatus() ;
-
-    if ( err != Storage_VSOk ) {
-      ReturnMessage += BuildStorageErrorMessage(d->ErrorStatus());
-      return Standard_False;
-    }
-    // Close the file driver
-    f.Close();
-
-    ReturnMessage += "Application Name :"; ReturnMessage += d->ApplicationName();ReturnMessage += "\n";
-    ReturnMessage += "Application Version :"; ReturnMessage += d->ApplicationVersion();ReturnMessage += "\n";
-    ReturnMessage += "Data type :"; ReturnMessage += d->DataType();ReturnMessage += "\n";
-    ReturnMessage += "== User Infos : ==\n";
-    const TColStd_SequenceOfAsciiString& UserInfo = d->UserInfo();
-    for (int i=1;i<=UserInfo.Length();i++)
-      {ReturnMessage += UserInfo(i);ReturnMessage += "\n";}
-    ReturnMessage += "== Comments : ==\n";
-    const TColStd_SequenceOfExtendedString& Comments=d->Comments();
-    for ( int i=1;i<=Comments.Length();i++)
-      {ReturnMessage += Comments(i);ReturnMessage += "\n";}
-    ReturnMessage += "----------------\n";
-
-
-    // Read all the root objects
-    // Get the root list
-    Handle(Storage_HSeqOfRoot)  roots = d->Roots();
-    Handle(Standard_Persistent) p;
-    Handle(Storage_Root) r;
-    Handle(PTopoDS_HShape) aPShape;
-    for ( int i = 1; i <= roots->Length() ; i++ ) 
-     {
-      // Get the root
-      r = roots->Value(i);
-
-      // Get the persistent application object from the root
-      p = r->Object();
-
-      // Display information
-      ReturnMessage += "Persistent Object "; ReturnMessage += i; ReturnMessage += "\n";
-      ReturnMessage += "Name             :"; ReturnMessage += r->Name(); ReturnMessage += "\n";
-      ReturnMessage += "Type             :"; ReturnMessage += r->Type(); ReturnMessage += "\n";
-
-      aPShape  = Handle(PTopoDS_HShape)::DownCast(p);
-
-      if ( !aPShape.IsNull() ) 
-        {
-	      //   To Be  ReWriten to suppress the cout,
-          //    and provide a CallBack method for dynamic information. 
-	      // Get the persistent shape
-	      PTColStd_PersistentTransientMap aMap;
-	      TopoDS_Shape aTShape;
-          MgtBRep::Translate(aPShape,aMap,aTShape,
-		    MgtBRep_WithTriangle);
-          aHSequenceOfShape->Append(aTShape);
-        } 
-	    else
-	    {
-		      ReturnMessage += "Error -> Unable to read\n";
-	    } 
-    } 
-    return Standard_True;
-}
-//----------------------------------------------------------------------
-void CImportExport::SaveCSFDB(const Handle(AIS_InteractiveContext)& anInteractiveContext)
-{
-    anInteractiveContext->InitCurrent();
-	if (anInteractiveContext->NbCurrents() == 0){
-		AfxMessageBox (L"No shape selected for export!");
-		return;
-	}
-    Handle(Quantity_HArray1OfColor)   anArrayOfColors;
-    Handle(TColStd_HArray1OfReal)     anArrayOfTransparencies;
-	CImportExport::SaveCSFDB(BuildSequenceFromContext(anInteractiveContext, anArrayOfColors, anArrayOfTransparencies));
-}
-
-Standard_Boolean CImportExport::SaveCSFDB(const Handle(TopTools_HSequenceOfShape)& aHSequenceOfShape)
-{
-  Standard_Boolean result = Standard_False; 
-  CFileSaveCSFDBDialog aDlg(NULL);
-  aDlg.m_TriangleMode = MgtBRep_WithTriangle;
-  if (aDlg.DoModal() == IDOK) 
-  {
-        SetCursor(AfxGetApp()->LoadStandardCursor(IDC_WAIT)); 
-        TCollection_ExtendedString aFileNameW ((Standard_ExtString )(const wchar_t* )aDlg.GetPathName());
-        TCollection_AsciiString    aFileName  (aFileNameW, '?');
-        TCollection_AsciiString Message;
-    //MgtBRep_TriangleMode selection = aDlg.m_TriangleMode;
-        Standard_Boolean result = SaveCSFDB (aFileName.ToCString(), aHSequenceOfShape, Message);
-        CString aMsg (Message.ToCString());
-        MessageBoxW (AfxGetApp()->m_pMainWnd->m_hWnd, aMsg, result ? L"CasCade" : L"CasCade Error", result ? MB_OK : MB_ICONERROR);
-        SetCursor(AfxGetApp()->LoadStandardCursor(IDC_ARROW)); 
-    } 
-  return result;
-}
-
-Standard_Boolean CImportExport::SaveCSFDB(const Standard_CString& aFileName,
-                                          const Handle(TopTools_HSequenceOfShape)& aHSequenceOfShape,
-                                          TCollection_AsciiString& ReturnMessage,// out parameter
-                                          MgtBRep_TriangleMode /*aTriangleMode*/ /* = MgtBRep_WithTriangle */)
-{
-	Standard_Boolean ReturnValue = Standard_True;
-    if (aHSequenceOfShape->Length() == 0)
-    {
-        MessageBoxW (AfxGetApp()->m_pMainWnd->m_hWnd, L"No Shape in the HSequence!!", L"CasCade Warning", MB_ICONWARNING);
-        return Standard_False;
-    }
- 
-    // an I/O driver
-    FSD_File f;
-
-    // the applicative Schema containing 
-    // Pesistent Topology and Geometry
-    Handle(ShapeSchema) s = new ShapeSchema;
-
-    // a Read/Write data object
-    Handle(Storage_Data) d = new Storage_Data;
-
-    d->ClearErrorStatus();
-
-    //   To Be  ReWriten to suppress the Strings,
-    //    and provide a CallBack method for dynamic information. 
-
-    d->SetApplicationName  (TCollection_ExtendedString("SampleImportExport"));
-    d->SetApplicationVersion("1");
-    d->SetDataType(TCollection_ExtendedString("Shapes"));
-    d->AddToUserInfo("Try to store a Persistent set of Shapes in a flat file");
-    d->AddToComments(TCollection_ExtendedString("application is based on CasCade 2.0"));
-
-    // Open the archive, Write mode
-    Storage_Error err = f.Open(aFileName, Storage_VSWrite);
-
-    if ( err != Storage_VSOk ) {
-      ReturnMessage += BuildStorageErrorMessage(err);
-      return Standard_False;
-    }
-
-    PTColStd_TransientPersistentMap aMap;
-    ReturnMessage += "The Object have be saved in the file ";
-    ReturnMessage += aFileName;
-    ReturnMessage += "\n with the names : ";
-
-	for (Standard_Integer i=1;i<=aHSequenceOfShape->Length();i++)
-	{
-		TopoDS_Shape aTShape= aHSequenceOfShape->Value(i);
-		TCollection_AsciiString anObjectName("anObjectName_");
-		anObjectName += i;
-		ReturnMessage += anObjectName;
-		ReturnMessage += " \n";
-
-		if ( aTShape.IsNull() ) 
-		{
-			ReturnMessage += " Error : Invalid shape \n";
-			ReturnValue = Standard_False;
-			continue;
-		 }
-
-		//Create the persistent Shape
-
-		Handle(PTopoDS_HShape) aPShape = 
-		 MgtBRep::Translate(aTShape, aMap, MgtBRep_WithTriangle);
-
- 
-		// Add the object in the data structure as root
-		//   To Be  ReWriten to suppress the cout,
-		//    and provide a CallBack method for dynamic information. 
-		d->AddRoot(anObjectName, aPShape);
-	}
-
-    // Write the object in the file with the schema
-    s->Write( f, d);
-
-    // Close the driver
-    f.Close();
-
-    if ( d->ErrorStatus() != Storage_VSOk ) 
-     {
-        ReturnMessage += BuildStorageErrorMessage(d->ErrorStatus());
-        return Standard_False;
-     } 
-    return ReturnValue;
-}
-
-
 //======================================================================
 //=                                                                    =
 //=                      IGES                                          =
@@ -585,9 +266,9 @@ Handle(TopTools_HSequenceOfShape) CImportExport::ReadIGES()// not by reference -
                   L"IGES Files (*.iges , *.igs)|*.iges; *.igs|All Files (*.*)|*.*||",
                   NULL );
 
-CString CASROOTValue;
-CASROOTValue.GetEnvironmentVariable (L"CASROOT");
-CString initdir = (CASROOTValue + "\\..\\data\\iges");
+CString SHAREPATHValue;
+SHAREPATHValue.GetEnvironmentVariable (L"CSF_OCCTDataPath");
+CString initdir = (SHAREPATHValue + "\\iges");
 
 dlg.m_ofn.lpstrInitialDir = initdir;
   
@@ -649,9 +330,9 @@ Standard_Boolean CImportExport::SaveIGES(const Handle(TopTools_HSequenceOfShape)
   CFileDialog dlg(FALSE, L"*.iges",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
                   L"IGES Files (*.iges )|*.iges;|IGES Files (*.igs )| *.igs;||", NULL);
 
-CString CASROOTValue;
-CASROOTValue.GetEnvironmentVariable (L"CASROOT");
-CString initdir = (CASROOTValue + "\\..\\data\\iges");
+CString SHAREPATHValue;
+SHAREPATHValue.GetEnvironmentVariable (L"CSF_OCCTDataPath");
+CString initdir = (SHAREPATHValue + "\\iges");
 
 dlg.m_ofn.lpstrInitialDir = initdir;
   
@@ -712,9 +393,9 @@ Handle(TopTools_HSequenceOfShape) CImportExport::ReadSTEP()// not by reference -
                   L"STEP Files (*.stp;*.step)|*.stp; *.step|All Files (*.*)|*.*||",
                   NULL );
 
-CString CASROOTValue;
-CASROOTValue.GetEnvironmentVariable(L"CASROOT");
-CString initdir = (CASROOTValue + "\\..\\data\\step");
+CString SHAREPATHValue;
+SHAREPATHValue.GetEnvironmentVariable (L"CSF_OCCTDataPath");
+CString initdir = (SHAREPATHValue + "\\step");
 
 dlg.m_ofn.lpstrInitialDir = initdir;
   
@@ -741,26 +422,6 @@ dlg.m_ofn.lpstrInitialDir = initdir;
   }
   return aSequence;
 }
-//Handle(TopTools_HSequenceOfShape) CImportExport::ReadSTEP(TCollection_ExtendedString aFileNameW)// not by reference --> the sequence is created here !!
-//{
-//	Handle(TopTools_HSequenceOfShape) aSequence= new TopTools_HSequenceOfShape();
-//	TCollection_AsciiString    aFileName  (aFileNameW, '?');
-//	IFSelect_ReturnStatus ReturnStatus = ReadSTEP (aFileName.ToCString(), aSequence);
-//	switch (ReturnStatus) 
-//	{
-//	case IFSelect_RetError :
-//		MessageBoxW (AfxGetApp()->m_pMainWnd->m_hWnd, L"Not a valid Step file", L"ERROR", MB_ICONWARNING);
-//		break;
-//	case IFSelect_RetFail :
-//		MessageBoxW (AfxGetApp()->m_pMainWnd->m_hWnd, L"Reading has failed", L"ERROR", MB_ICONWARNING);
-//		break;
-//	case IFSelect_RetVoid :
-//		MessageBoxW (AfxGetApp()->m_pMainWnd->m_hWnd, L"Nothing to transfer", L"ERROR", MB_ICONWARNING);
-//		break;
-//	}
-//
-//	return aSequence;
-//}
 
 IFSelect_ReturnStatus CImportExport::ReadSTEP(const Standard_CString& aFileName,
                                               Handle(TopTools_HSequenceOfShape)& aHSequenceOfShape)
@@ -919,6 +580,58 @@ const STEPControl_StepModelType aValue /* =TopoDSToCc1Act_ManifoldSolidBrep */ )
 //=                      STL                                           =
 //=                                                                    =
 //======================================================================
+void CImportExport::ReadSTL(const Handle(AIS_InteractiveContext)& anInteractiveContext)
+{
+	Handle(MeshVS_Mesh) aMesh = CImportExport::ReadSTL();
+	if (!aMesh.IsNull()) {	
+			anInteractiveContext->Display(aMesh);
+	}
+}
+Standard_Boolean CImportExport::ReadSTL(const Standard_CString& aFileName, Handle(MeshVS_Mesh)& aMesh)
+{
+	Standard_Boolean result;
+	OSD_Path aFile(aFileName);
+	Handle(StlMesh_Mesh) aSTLMesh = RWStl::ReadFile(aFile);
+	Handle( XSDRAWSTLVRML_DataSource ) aDS = new XSDRAWSTLVRML_DataSource(aSTLMesh);
+	aMesh->SetDataSource(aDS);
+	aMesh->AddBuilder( new MeshVS_MeshPrsBuilder( aMesh), Standard_True );//False -> No selection
+
+	aMesh->GetDrawer()->SetBoolean(MeshVS_DA_DisplayNodes,Standard_False); //MeshVS_DrawerAttribute
+	aMesh->GetDrawer()->SetBoolean(MeshVS_DA_ShowEdges,Standard_False);
+	aMesh->GetDrawer()->SetMaterial(MeshVS_DA_FrontMaterial,Graphic3d_NameOfMaterial::Graphic3d_NOM_GOLD);
+
+	aMesh->SetColor(Quantity_NOC_AZURE);
+	aMesh->SetDisplayMode( MeshVS_DMF_Shading ); // Mode as defaut
+	aMesh->SetHilightMode( MeshVS_DMF_WireFrame ); // Wireframe as default hilight mode
+
+	return !aMesh.IsNull();
+}
+Handle(MeshVS_Mesh) CImportExport::ReadSTL()
+{
+	CFileDialog dlg(TRUE,
+		NULL,
+		NULL,
+		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+		L"STL Files (*.stl)|*.stl; *.STL|All Files (*.*)|*.*||",
+		NULL );
+
+	CString SHAREPATHValue;
+	SHAREPATHValue.GetEnvironmentVariable (L"CSF_OCCTDataPath");
+	CString initdir = (SHAREPATHValue + "\\stl");
+
+	dlg.m_ofn.lpstrInitialDir = initdir;
+
+	Handle(MeshVS_Mesh) aMesh= new MeshVS_Mesh();
+	if (dlg.DoModal() == IDOK) 
+	{
+		SetCursor(AfxGetApp()->LoadStandardCursor(IDC_WAIT));
+		TCollection_ExtendedString aFileNameW ((Standard_ExtString )(const wchar_t* )dlg.GetPathName());
+		TCollection_AsciiString    aFileName  (aFileNameW, '?');
+		Standard_Boolean result = ReadSTL (aFileName.ToCString(), aMesh);
+		SetCursor(AfxGetApp()->LoadStandardCursor(IDC_ARROW));       
+	}
+	return aMesh;
+}
 
 void CImportExport::SaveSTL(const Handle(AIS_InteractiveContext)& anInteractiveContext)
 {
@@ -934,21 +647,21 @@ void CImportExport::SaveSTL(const Handle(AIS_InteractiveContext)& anInteractiveC
 
 Standard_Boolean CImportExport::SaveSTL(const Handle(TopTools_HSequenceOfShape)& aHSequenceOfShape)
 {
-  CFileDialog dlg(FALSE, L"*.stl", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
-	              L"stl Files (*.stl)|*.stl;|STL Files (*.STL)|*.STL;||", NULL);
+	CFileDialog dlg(FALSE, L"*.stl", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+		L"stl Files (*.stl)|*.stl;|STL Files (*.STL)|*.STL;||", NULL);
 
-CString CASROOTValue;
-CASROOTValue.GetEnvironmentVariable(L"CASROOT");
-CString initdir = (CASROOTValue + "\\..\\data\\stl");
+	CString SHAREPATHValue;
+	SHAREPATHValue.GetEnvironmentVariable (L"CSF_OCCTDataPath");
+	CString initdir = (SHAREPATHValue + "\\stl");
 
-dlg.m_ofn.lpstrInitialDir = initdir;
+	dlg.m_ofn.lpstrInitialDir = initdir;
 
 	Standard_Boolean result = Standard_False;
 
 	if (dlg.DoModal() == IDOK) {
-        SetCursor(AfxGetApp()->LoadStandardCursor(IDC_WAIT)); 
-        TCollection_ExtendedString aFileNameW ((Standard_ExtString )(const wchar_t* )dlg.GetPathName());
-        TCollection_AsciiString    aFileName  (aFileNameW, '?');
+		SetCursor(AfxGetApp()->LoadStandardCursor(IDC_WAIT)); 
+		TCollection_ExtendedString aFileNameW ((Standard_ExtString )(const wchar_t* )dlg.GetPathName());
+		TCollection_AsciiString    aFileName  (aFileNameW, '?');
         TCollection_AsciiString Message;
         result = SaveSTL (aFileName.ToCString(), aHSequenceOfShape, Message);
         CString aMsg (Message.ToCString());
@@ -969,7 +682,6 @@ Standard_Boolean CImportExport::SaveSTL(const Standard_CString& aFileName,
         return Standard_False;
     }
 
-    PTColStd_TransientPersistentMap aMap;
     ReturnMessage += "The Object have be saved in the file ";
     ReturnMessage += aFileName;
     ReturnMessage += "\n with the names : ";
@@ -1029,9 +741,9 @@ Standard_Boolean CImportExport::SaveVRML(const Handle(TopTools_HSequenceOfShape)
   CFileDialog dlg(FALSE, L"*.vrml", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
 	              L"vrml Files (*.vrml)|*.vrml;|vrm Files (*.vrm)|*.vrm;||", NULL);
 
-CString CASROOTValue;
-CASROOTValue.GetEnvironmentVariable(L"CASROOT");
-CString initdir = (CASROOTValue + "\\..\\data\\vrml");
+CString SHAREPATHValue;
+SHAREPATHValue.GetEnvironmentVariable (L"CSF_OCCTDataPath");
+CString initdir = (SHAREPATHValue + "\\vrml");
 
 dlg.m_ofn.lpstrInitialDir = initdir;
   
@@ -1063,7 +775,6 @@ Standard_Boolean CImportExport::SaveVRML(const Standard_CString&                
         return Standard_False;
     }
 
-    PTColStd_TransientPersistentMap aMap;
     ReturnMessage += "The Object has been saved in the file ";
     ReturnMessage += aFileName;
     ReturnMessage += "\n with the names : ";
@@ -1073,15 +784,15 @@ Standard_Boolean CImportExport::SaveVRML(const Standard_CString&                
     VrmlData_ShapeConvert converter(scene/*, 0.001*/); // from mm to meters 
     Standard_Integer iShape = 1; // Counter of shapes
 
-	for ( int i = 1; i <= aHSequenceOfShape->Length(); i++ )
-	{
+    for (int i = 1; i <= aHSequenceOfShape->Length(); i++)
+    {
         // Shape
-		TopoDS_Shape shape = aHSequenceOfShape->Value( i );
-		if ( shape.IsNull() )
-		{
-			ReturnMessage += " Error : Invalid shape \n";
-			ReturnValue = Standard_False;
-			continue;
+        TopoDS_Shape shape = aHSequenceOfShape->Value(i);
+        if (shape.IsNull())
+        {
+          ReturnMessage += " Error : Invalid shape \n";
+          ReturnValue = Standard_False;
+          continue;
         }
 
         // Color
@@ -1138,8 +849,8 @@ Standard_Boolean CImportExport::SaveVRML(const Standard_CString&                
                 Handle(VrmlData_Node) node = itr.Value();
                 if (node->DynamicType() == STANDARD_TYPE(VrmlData_ShapeNode))
                 {
-                    Handle(VrmlData_ShapeNode) shape = Handle(VrmlData_ShapeNode)::DownCast(node);
-                    shape->SetAppearance(appearance);
+                    Handle(VrmlData_ShapeNode) aShape = Handle(VrmlData_ShapeNode)::DownCast(node);
+                    aShape->SetAppearance(appearance);
                 }
                 else if (itr.Value()->DynamicType() == STANDARD_TYPE(VrmlData_Group))
                 {

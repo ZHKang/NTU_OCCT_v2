@@ -32,6 +32,7 @@
 #include <AIS_Shape.hxx>
 #include <AIS_Point.hxx>
 #include <AIS_Drawer.hxx>
+#include <AIS_Axis.hxx>
 #include <Aspect_Grid.hxx>
 #include <Aspect_Window.hxx>
 #include <Aspect_Background.hxx>
@@ -39,12 +40,15 @@
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <BRepAlgo.hxx>
 #include <BRep_Builder.hxx>
+#include <BRepGProp.hxx>
 
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepPrimAPI_MakeSphere.hxx>
 #include <BRepPrimAPI_MakeWedge.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <BRepPrimAPI_MakeTorus.hxx>
+#include <BRepPrimAPI_MakePrism.hxx>
+#include <BRepPrimAPI_MakeRevol.hxx>
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepBuilderAPI_MakePolygon.hxx>
@@ -58,6 +62,7 @@
 #include <BndLib_AddSurface.hxx>   
 #include <BRep_Tool.hxx>
 
+#include <Draw.hxx>
 #include <DsgPrs_LengthPresentation.hxx>
 #include <FairCurve_Batten.hxx>
 #include <FairCurve_MinimalVariation.hxx>
@@ -86,6 +91,7 @@
 #include <GCPnts_QuasiUniformDeflection.hxx>
 #include <GCPnts_TangentialDeflection.hxx>
 #include <GCPnts_UniformAbscissa.hxx>
+#include <Geom_Axis1Placement.hxx>
 #include <Geom_BezierSurface.hxx>
 #include <Geom_BSplineCurve.hxx>
 #include <Geom_BSplineSurface.hxx>
@@ -150,6 +156,7 @@
 #include <Graphic3d_ArrayOfPolylines.hxx>
 #include <Graphic3d_ArrayOfSegments.hxx>
 #include <GProp_PEquation.hxx>
+#include <GProp_GProps.hxx>
 #include <gp.hxx>
 #include <gp_Ax2d.hxx>
 #include <gp_Circ2d.hxx>
@@ -168,6 +175,7 @@
 
 #include <IntAna_IntConicQuad.hxx>
 
+#include <Message_ProgressIndicator.hxx>
 #include <MeshVS_Mesh.hxx>
 #include <MeshVS_MeshPrsBuilder.hxx>
 #include <MeshVS_Drawer.hxx>
@@ -242,7 +250,9 @@
 #include <V3d_Viewer.hxx>
 #include <V3d_View.hxx>
 #include <WNT_Window.hxx>
+//發生存取違規
 #include <XSDRAWSTLVRML_DataSource.hxx>
+//#include <XSDRAWSTEP.hxx>
 
 
 

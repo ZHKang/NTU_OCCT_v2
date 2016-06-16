@@ -5,7 +5,8 @@
 #pragma once
 #include <OCC_3dView.h>
 
-class CNTU_OCCT_v2View : public OCC_3dView
+
+class CNTU_OCCT_v2View : public CView//OCC_3dView
 {
 protected: // create from serialization only
 	CNTU_OCCT_v2View();
@@ -27,13 +28,13 @@ protected:
 // Implementation
 public:
 	virtual ~CNTU_OCCT_v2View();
-	void FitAll(Quantity_Coefficient Coef)
-	{
-		if (Coef != -1)
-			myView->FitAll(Coef);
-		else myView->FitAll();
-		myView->ZFitAll();
-	};
+	//void FitAll(Quantity_Coefficient Coef)
+	//{
+	//	if (Coef != -1)
+	//		myView->FitAll(Coef);
+	//	else myView->FitAll();
+	//	myView->ZFitAll();
+	//};
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;

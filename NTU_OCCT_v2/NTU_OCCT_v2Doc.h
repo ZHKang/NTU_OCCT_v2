@@ -24,15 +24,16 @@ public:
 public:
 	virtual BOOL OnNewDocument();
 	virtual void Serialize(CArchive& ar);
+	int ReadSTLFcn(TCollection_AsciiString &aFileName);
 
 // Implementation
 public:
 	virtual ~CNTU_OCCT_v2Doc();
 public:
-	void ActivateFrame(CRuntimeClass* pViewClass, int nCmdShow = SW_RESTORE  );
-	virtual void Popup (const Standard_Integer  x       ,
+	//void ActivateFrame(CRuntimeClass* pViewClass, int nCmdShow = SW_RESTORE  );
+	virtual void Popup (const Standard_Integer  x ,
 		const Standard_Integer  y       ,
-		const Handle(V3d_View)& aView   );
+		const Handle(V3d_View)& aView   );  // «ö¤U¥kÁä
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
@@ -48,6 +49,8 @@ protected:
 	afx_msg void OnTorus();
 	afx_msg void OnRobot();
 	afx_msg void OnTranslation();
+	afx_msg void OnPrism();
+	afx_msg void OnVolume();
 	// Import Export
 	afx_msg void OnFileImportCSFDB();
 	afx_msg void OnFileExportCSFDB();

@@ -52,11 +52,9 @@ CNTU_OCCT_v2App theApp;
 
 BOOL CNTU_OCCT_v2App::InitInstance()
 {
-	CWinApp::InitInstance();
-
-
-	EnableTaskbarInteraction(FALSE);
-
+	//CWinApp::InitInstance();
+	//EnableTaskbarInteraction(FALSE);
+	AfxEnableControlContainer();
 	// AfxInitRichEdit2() is required to use RichEdit control	
 	// AfxInitRichEdit2();
 
@@ -77,7 +75,7 @@ BOOL CNTU_OCCT_v2App::InitInstance()
 	pDocTemplate = new CMultiDocTemplate(
 		IDR_NTU_OCCT_v2TYPE,
 		RUNTIME_CLASS(CNTU_OCCT_v2Doc),
-		RUNTIME_CLASS(OCC_3dChildFrame), // custom MDI child frame
+		RUNTIME_CLASS(CChildFrame), // custom MDI child frame
 		RUNTIME_CLASS(OCC_3dView));
 	if (!pDocTemplate)
 		return FALSE;
@@ -122,10 +120,10 @@ BOOL CNTU_OCCT_v2App::InitInstance()
 
 	return TRUE;
 }
-int CNTU_OCCT_v2App::ExitInstance()
-{
-	//TODO: handle additional resources you may have added
-	return CWinApp::ExitInstance();
-}
+//int CNTU_OCCT_v2App::ExitInstance()
+//{
+//	//TODO: handle additional resources you may have added
+//	return CWinApp::ExitInstance();
+//}
 
 

@@ -24,7 +24,7 @@ public:
 // Overrides
 public:
 	virtual BOOL InitInstance();
-	virtual int ExitInstance();
+	//virtual int ExitInstance();
 
 // Implementation
 	DECLARE_MESSAGE_MAP()
@@ -32,4 +32,4 @@ private:
 	CToolBar *m_ImpExpToolbar;
 };
 
-extern CNTU_OCCT_v2App theApp;
+//extern CNTU_OCCT_v2App theApp;
