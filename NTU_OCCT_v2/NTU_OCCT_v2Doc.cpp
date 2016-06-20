@@ -18,7 +18,7 @@
 
 IMPLEMENT_DYNCREATE(CNTU_OCCT_v2Doc, CDocument)
 
-BEGIN_MESSAGE_MAP(CNTU_OCCT_v2Doc, OCC_3dBaseDoc)
+BEGIN_MESSAGE_MAP(CNTU_OCCT_v2Doc, OCC_3dDoc)
 	ON_COMMAND(ID_BOX, OnBox)
 	ON_COMMAND(ID_Cylinder, OnCylinder)
 	ON_COMMAND(ID_SPHERE, OnSphere)
@@ -39,7 +39,6 @@ BEGIN_MESSAGE_MAP(CNTU_OCCT_v2Doc, OCC_3dBaseDoc)
 	ON_COMMAND(ID_FILE_EXPORT_VRML, OnFileExportVrml)
 	ON_COMMAND(ID_FILE_IMPORT_STL, OnFileImportStl)
 	ON_COMMAND(ID_FILE_EXPORT_STL, OnFileExportStl)
-
 END_MESSAGE_MAP()
 
 
@@ -192,9 +191,7 @@ void CNTU_OCCT_v2Doc::OnSphere()
 	if(mySphere.IsNull())
 	{
 		BRepPrimAPI_MakeSphere S(gp_Pnt(0,300,0), 100.);
-
 		mySphere = new AIS_Shape(S.Shape());
-
 		myAISContext->SetMaterial(mySphere,Graphic3d_NOM_BRONZE);
 		myAISContext->SetDisplayMode(mySphere,1);
 		myAISContext->Display(mySphere);
@@ -275,7 +272,7 @@ void CNTU_OCCT_v2Doc::OnRobot()
 	Standard_CString aFileName;
 	aFileName= "..//3rdParty//CAD//Atom//BASE.STL";
 	Handle(MeshVS_Mesh) bMesh = new MeshVS_Mesh();
-	bMesh->GetDrawer()->SetColor(MeshVS_DA_InteriorColor ,Quantity_NOC_LIGHTGRAY );
+	bMesh->GetDrawer()->SetColor(MeshVS_DA_InteriorColor ,Quantity_NOC_SIENNA);
 	//bMesh->GetDrawer()->SetBoolean(MeshVS_DA_IsAllowOverlapped, Standard_True);
 	//bMesh->GetDrawer()->SetBoolean(MeshVS_DA_ShowEdges,Standard_True);
 	//bMesh->GetDrawer()->SetColor(MeshVS_DA_EdgeColor,Quantity_NOC_GRAY2);
@@ -285,34 +282,34 @@ void CNTU_OCCT_v2Doc::OnRobot()
 	aFileName = "..//3rdParty//CAD//Atom//J1.STL";
 	Handle(MeshVS_Mesh) J1Mesh = new MeshVS_Mesh();
 	Standard_Boolean status1 = CImportExport::ReadSTL(aFileName,J1Mesh);
-	J1Mesh->GetDrawer()->SetColor(MeshVS_DA_InteriorColor ,Quantity_NOC_LIGHTPINK );
+	J1Mesh->GetDrawer()->SetColor(MeshVS_DA_InteriorColor ,Quantity_NOC_LIGHTGRAY );
 	//J1Mesh->GetDrawer()->SetBoolean(MeshVS_DA_ShowEdges,Standard_True);
 	myAISContext->Display(J1Mesh);
 	Fit();
 	aFileName = "..//3rdParty//CAD//Atom//J2.STL";
 	Handle(MeshVS_Mesh) J2Mesh = new MeshVS_Mesh();
 	Standard_Boolean status2 = CImportExport::ReadSTL(aFileName,J2Mesh);
-	J2Mesh->GetDrawer()->SetColor(MeshVS_DA_InteriorColor ,Quantity_NOC_CORAL2 );
+	J2Mesh->GetDrawer()->SetColor(MeshVS_DA_InteriorColor ,Quantity_NOC_GOLD );
 	J2Mesh->GetDrawer()->SetBoolean(MeshVS_DA_IsAllowOverlapped, Standard_True);
 	//J2Mesh->GetDrawer()->SetBoolean(MeshVS_DA_ShowEdges,Standard_True);
 	myAISContext->Display(J2Mesh);
 	Fit();
 	aFileName = "..//3rdParty//CAD//Atom//J3.STL";
 	Handle(MeshVS_Mesh) J3Mesh = new MeshVS_Mesh();
-	J3Mesh->GetDrawer()->SetColor(MeshVS_DA_InteriorColor ,Quantity_NOC_VIOLETRED);
+	J3Mesh->GetDrawer()->SetColor(MeshVS_DA_InteriorColor ,Quantity_NOC_GRAY30);
 	J3Mesh->GetDrawer()->SetBoolean(MeshVS_DA_IsAllowOverlapped, Standard_True);
 	Standard_Boolean status3 = CImportExport::ReadSTL(aFileName,J3Mesh);
 	myAISContext->Display(J3Mesh);
 	Fit();
 	aFileName = "..//3rdParty//CAD//Atom//J4.STL";
 	Handle(MeshVS_Mesh) J4Mesh = new MeshVS_Mesh();
-	J4Mesh->GetDrawer()->SetColor(MeshVS_DA_InteriorColor ,Quantity_NOC_GREEN);
+	J4Mesh->GetDrawer()->SetColor(MeshVS_DA_InteriorColor ,Quantity_NOC_GOLD);
 	Standard_Boolean status4 = CImportExport::ReadSTL(aFileName,J4Mesh);
 	myAISContext->Display(J4Mesh);
 	Fit();
 	aFileName = "..//3rdParty//CAD//Atom//J5.STL";
 	Handle(MeshVS_Mesh) J5Mesh = new MeshVS_Mesh();
-	J5Mesh->GetDrawer()->SetColor(MeshVS_DA_InteriorColor ,Quantity_NOC_VIOLETRED);
+	J5Mesh->GetDrawer()->SetColor(MeshVS_DA_InteriorColor ,Quantity_NOC_GRAY30);
 	J5Mesh->GetDrawer()->SetBoolean(MeshVS_DA_IsAllowOverlapped, Standard_True);
 	Standard_Boolean status5 = CImportExport::ReadSTL(aFileName,J5Mesh);
 	myAISContext->Display(J5Mesh);

@@ -17,9 +17,9 @@
 #ifndef _Standard_values_HeaderFile
 # define _Standard_values_HeaderFile
 
-#if defined(_MSC_VER) && !defined(WNT)
-#error "Wrong compiler options has been detected. Add /DWNT option for proper compilation!!!!!"
-#endif
+//#if defined(_MSC_VER) && !defined(WNT)
+//#error "Wrong compiler options has been detected. Add /DWNT option for proper compilation!!!!!"
+//#endif
 
 #ifdef _WIN32
 # include <limits>
