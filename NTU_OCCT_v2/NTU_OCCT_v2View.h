@@ -28,6 +28,7 @@ protected:
 // Implementation
 public:
 	virtual ~CNTU_OCCT_v2View();
+	afx_msg void OnStop();
 	//void FitAll(Quantity_Coefficient Coef)
 	//{
 	//	if (Coef != -1)

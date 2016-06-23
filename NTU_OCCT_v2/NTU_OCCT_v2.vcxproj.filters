@@ -57,6 +57,9 @@
     <ClInclude Include="Resource.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
+    <ClInclude Include="TransformationDlg.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="NTU_OCCT_v2.cpp">
@@ -78,6 +81,9 @@
       <Filter>原始程式檔</Filter>
     </ClCompile>
     <ClCompile Include="..\3rdParty\Common\Winmain.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformationDlg.cpp">
       <Filter>原始程式檔</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,8 +1,9 @@
-
+﻿
 // NTU_OCCT_v2Doc.cpp : implementation of the CNTU_OCCT_v2Doc class
 //
 
 #include "stdafx.h"
+#include <Windows.h>
 
 #include "NTU_OCCT_v2.h"
 #include "NTU_OCCT_v2Doc.h"
@@ -12,6 +13,7 @@
 
 #include <Geom_Axis1Placement.hxx>
 #include <ImportExport/ImportExport.h>
+#include "TransformationDlg.h"
 
 
 // CNTU_OCCT_v2Doc
@@ -50,10 +52,12 @@ CNTU_OCCT_v2Doc::CNTU_OCCT_v2Doc()
 	myCylinder.Nullify();
 	mySphere.Nullify();
 	myBox.Nullify();
+	myBoxPntOld = gp_Pnt(0,0,0);   //Box Position
+	myBoxPntNew = gp_Pnt(0,0,0);
 
-	myAISContext->DefaultDrawer()->ShadingAspect()->SetColor(Quantity_NOC_CHARTREUSE1); 
-	myAISContext->DefaultDrawer()->ShadingAspect()->SetMaterial(Graphic3d_NOM_BRONZE);
-	myAISContext->SetDisplayMode(AIS_Shaded,Standard_False);
+	//myAISContext->DefaultDrawer()->ShadingAspect()->SetColor(Quantity_NOC_CHARTREUSE1); 
+	//myAISContext->DefaultDrawer()->ShadingAspect()->SetMaterial(Graphic3d_NOM_BRONZE);
+	//myAISContext->SetDisplayMode(AIS_Shaded,Standard_False);
 }
 
 CNTU_OCCT_v2Doc::~CNTU_OCCT_v2Doc()
@@ -163,8 +167,7 @@ void CNTU_OCCT_v2Doc::OnBox()
 {
 	if(myBox.IsNull())
 	{
-		BRepPrimAPI_MakeBox B(gp_Pnt(0,-400,-100), 200.,150.,100.);
-
+		BRepPrimAPI_MakeBox B(myBoxPntOld, 200.,150.,100.);
 
 		myBox = new AIS_Shape (B.Shape());
 
@@ -325,6 +328,12 @@ void CNTU_OCCT_v2Doc::OnRobot()
 }
 void CNTU_OCCT_v2Doc::OnTranslation()
 {
+	TransformationDlg pDlg(NULL);
+	pDlg.DoModal();
+	//TransformationDlg *pDlg = new TransformationDlg();
+	//pDlg->Create((UINT)IDD_Transformation, CWnd::GetDesktopWindow());
+	//pDlg->ShowWindow(SW_NORMAL);
+	////pDlg->UpdateWindow();
 }
 void CNTU_OCCT_v2Doc::OnPrism()
 {
@@ -517,4 +526,34 @@ void CNTU_OCCT_v2Doc::OnFileImportStl()
 void CNTU_OCCT_v2Doc::OnFileExportStl()
 {
 	CImportExport::SaveSTL(myAISContext);
+}
+void CNTU_OCCT_v2Doc::TransformationFcn(int TranslationSelec)
+{
+	Standard_Real xgrad = 1;
+	Standard_Real ygrad = 1;
+	Standard_Real zgrad = 1;
+	gp_Trsf translatoin;
+
+	switch(TranslationSelec)
+	{
+	case 1:
+		//myBoxPntNew.SetX(myBoxPntOld.X()+xgrad);
+		//translatoin.SetTranslation(myBoxPntOld,myBoxPntNew);
+		//myAISContext->SetLocation(myBox,translatoin);
+		//myBoxPntOld = myBoxPntNew;
+		break;
+	case 2:
+		break;
+	case 3:
+		break;
+	case 4:
+		break;
+	case 5:
+		break;
+	case 6:
+		break;
+	default:
+		break;
+
+	}
 }

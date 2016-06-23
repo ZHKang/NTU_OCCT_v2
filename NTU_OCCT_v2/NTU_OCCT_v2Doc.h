@@ -11,6 +11,7 @@
 
 class CNTU_OCCT_v2Doc : public OCC_3dDoc
 {
+public:
 	CNTU_OCCT_v2Doc();
 	DECLARE_DYNCREATE(CNTU_OCCT_v2Doc)
 
@@ -70,4 +71,8 @@ protected:
 	Handle_AIS_Shape myCylinder;
 	Handle_AIS_Shape mySphere;
 	Handle_AIS_Shape myBox;
+	gp_Pnt myBoxPntOld;
+	gp_Pnt myBoxPntNew;
+public:
+	void TransformationFcn(int TranslationSelec);
 };

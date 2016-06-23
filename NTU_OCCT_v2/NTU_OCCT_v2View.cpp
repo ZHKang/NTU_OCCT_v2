@@ -56,6 +56,11 @@ void CNTU_OCCT_v2View::OnDraw(CDC* /*pDC*/)
 	// TODO: add draw code for native data here
 }
 
+void CNTU_OCCT_v2View::OnStop()
+{
+	//KillTimer(GetDocument()->myCount);   
+}
+
 
 // CNTU_OCCT_v2View diagnostics
 
